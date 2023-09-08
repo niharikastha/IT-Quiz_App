@@ -4,14 +4,14 @@ import pattern from '../../assets/pattern.png';
 import logo from '../../assets/mainlogo.png';
 import { head1, head2, formGroup, label, input, link,link2 } from '../common/formcss';
 import { button1 } from '../common/button';
-const Login = () => {
+const Login = ({navigation}) => {
     return (
         <View style={styles.container}>
             <Image style={styles.patternbg} source={pattern} />
             <View style={styles.conatiner1}>
                 <View style={styles.s1}>
-                    {/* <Image style={styles.logo} source={logo}/> */}
-                    <Text style={styles.h1}>Used2, Inc.</Text>
+                    <Image style={styles.logo} source={logo}/>
+                    <Text style={styles.h1} onPress={()=>navigation.navigate('welcome')}>Used2, Inc.</Text>
                     <Text style={styles.small1}>Buying and selling online</Text>
                 </View>
                 <View style={styles.s2}>
@@ -19,11 +19,11 @@ const Login = () => {
                     <Text style={head2}>Sign in to Continue</Text>
                     <View style={formGroup}>
                         <Text style={label}>Email</Text>
-                        <TextInput style={input} />
+                        <TextInput style={input} placeholder="Enter your email"/>
                     </View>
                     <View style={formGroup}>
                         <Text style={label}>Password</Text>
-                        <TextInput style={input} />
+                        <TextInput style={input} placeholder="Enter your password"/>
                     </View>
                     <View style={styles.fp}>
                         <Text style={link}>Forgot Password</Text>
@@ -31,8 +31,8 @@ const Login = () => {
                     <View style={styles.buttonMargin}>
                         <Text style={button1}>Login</Text>
                     </View>
-                    <Text style={link2}>Don't have an account?
-                    <Text styel={link}>Create a new account</Text></Text>
+                    <Text style={link2}>Don't have an account? &nbsp;
+                    <Text styel={link} onPress={()=> navigation.navigate('signup')}>Create a new account</Text></Text>
     
                 </View>
             </View>
@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
         height: '60%',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
-
         padding: 20
     },
     fp: {
@@ -95,5 +94,9 @@ const styles = StyleSheet.create({
     buttonMargin: {
         marginLeft: 80
     },
+    logo:{
+      height : 80,
+      resizeMode:'contain',  
+    }
 
 })

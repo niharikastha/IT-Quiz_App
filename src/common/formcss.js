@@ -18,8 +18,8 @@ module.exports = {
     marginVertical :11,
 },
 label:{
-    fontSize:17,
-    color:'#000',
+    fontSize:14,
+    color:'#F50057',
     marginLeft:10,
 },
 input:{

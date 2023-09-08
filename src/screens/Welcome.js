@@ -3,17 +3,14 @@ import React from 'react'
 import pattern from '../../assets/pattern.png';
 import welcomelogo from '../../assets/welcomelogo.png'
 import { button1 } from '../common/button';
-const Welcome = () => {
+const Welcome = ({navigation}) => {
   return (
     <View style={styles.container}>
         <Image style= {styles.patternbg} source={pattern}/>
-        {/* <Text style={styles.head}>Hii</Text> */}
         <View style={styles.conatiner1}>
-            
-             {/* <Text style={styles.head}>Welcome </Text> */}
-            {/* <Image style={styles.logo} source={welcomelogo}/> */}
-            <Text style={button1}>Login</Text>
-            <Text style={button1}>Signup</Text>
+            <Image style={styles.logo} source={welcomelogo}/>
+            <Text style={button1} onPress={()=> navigation.navigate('login')}>Login</Text>
+            <Text style={button1} onPress={()=> navigation.navigate('signup')}>Signup</Text>
         </View>
     </View>
   )
@@ -22,7 +19,7 @@ const Welcome = () => {
 export default Welcome
 
 const styles = StyleSheet.create({
-    conatiner:{
+    container:{
         width :'100%',
         height :'100%',
     },
@@ -37,13 +34,14 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent:'center',
         alignItems:'center',
-        height:'100%'
+        height:'100%',
+        width :'100%',
 
     },
     logo:{
-        width :'70%',
-        height:'70%',
-
+      height:'20%',
+      resizeMode:'contain',
+      marginBottom: 50,
     }
 
 })
