@@ -1,39 +1,89 @@
-import { StyleSheet, Text, View, Image, TextInput } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
 import pattern from '../../assets/pattern.png';
 import logo from '../../assets/mainlogo.png';
-import { head1, head2, formGroup, label, input, link,link2 } from '../common/formcss';
+import { head1, head2, formGroup, label, input, link, link2,errormessage } from '../common/formcss';
 import { button1 } from '../common/button';
-const Login = ({navigation}) => {
+const Login = ({ navigation }) => {
+    const [fdata, setFdata] = useState({
+        email: '',
+        password: ''
+    })
+
+    const [errormsg, setErrormsg] = useState(null);
+    const Sendtobackend = () => {
+        // console.log(fdata);
+        if(fdata.email == '' || fdata.password == ''){
+            setErrormsg("All fields are required");
+            return;
+        }
+        else{
+            fetch('https://192.168.29.122:4000/signin', {
+                method :'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify(fdata)
+            })
+            .then(res => res.json()).then(
+                data =>{
+                    // console.log(data);
+                    if(data.error){
+                        setErrormsg(data.error);
+                    }
+                    else{
+                        alert('Login Successfull');
+
+                    }
+                }
+            )
+        }
+
+    }
     return (
         <View style={styles.container}>
             <Image style={styles.patternbg} source={pattern} />
             <View style={styles.conatiner1}>
                 <View style={styles.s1}>
-                    <Image style={styles.logo} source={logo}/>
-                    <Text style={styles.h1} onPress={()=>navigation.navigate('welcome')}>Used2, Inc.</Text>
+                    <Image style={styles.logo} source={logo} />
+                    <Text style={styles.h1} onPress={() => navigation.navigate('welcome')}>Used2, Inc.</Text>
                     <Text style={styles.small1}>Buying and selling online</Text>
                 </View>
                 <View style={styles.s2}>
                     <Text style={head1}>Login</Text>
                     <Text style={head2}>Sign in to Continue</Text>
+                    {
+                        errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
+                    }
                     <View style={formGroup}>
                         <Text style={label}>Email</Text>
-                        <TextInput style={input} placeholder="Enter your email"/>
+                        <TextInput style={input}
+                            placeholder="Enter your email"
+                            onPressIn={()=>setErrormsg(null)}
+                            onChangeText={(text) => setFdata({ ...fdata, email: text })}
+                        />
                     </View>
                     <View style={formGroup}>
                         <Text style={label}>Password</Text>
-                        <TextInput style={input} placeholder="Enter your password"/>
+                        <TextInput style={input}
+                            placeholder="Enter your password"
+                            onPressIn={()=>setErrormsg(null)}
+                            secureTextEntry={true}
+                            onChangeText={(text) => setFdata({ ...fdata, password: text })}
+                        />
                     </View>
                     <View style={styles.fp}>
                         <Text style={link}>Forgot Password</Text>
                     </View>
-                    <View style={styles.buttonMargin}>
-                        <Text style={button1}>Login</Text>
-                    </View>
+                    <TouchableOpacity style={styles.buttonMargin}
+                        onPress={() => Sendtobackend()}
+                    >
+                        <Text style={button1}
+                        >Login</Text>
+                    </TouchableOpacity>
                     <Text style={link2}>Don't have an account? &nbsp;
-                    <Text styel={link} onPress={()=> navigation.navigate('signup')}>Create a new account</Text></Text>
-    
+                        <Text styel={link} onPress={() => navigation.navigate('signup')}>Create a new account</Text></Text>
+
                 </View>
             </View>
         </View>
@@ -94,9 +144,9 @@ const styles = StyleSheet.create({
     buttonMargin: {
         marginLeft: 80
     },
-    logo:{
-      height : 80,
-      resizeMode:'contain',  
+    logo: {
+        height: 80,
+        resizeMode: 'contain',
     }
 
 })

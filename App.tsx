@@ -3,6 +3,7 @@ import React from 'react'
 import Welcome from './src/screens/Welcome'
 import Login from './src/screens/Login'
 import Signup from './src/screens/Signup'
+import Homepage from './src/screens/Homepage'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import 'react-native-gesture-handler';
@@ -24,6 +25,11 @@ const App = () => {
         } 
         />
         <Stack.Screen name="signup" component={Signup} 
+         options={
+          {headerShown : false}
+        } 
+        />
+        <Stack.Screen name="homepage" component={Homepage} 
          options={
           {headerShown : false}
         } 
