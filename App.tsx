@@ -4,6 +4,10 @@ import Welcome from './src/screens/Welcome'
 import Login from './src/screens/Login'
 import Signup from './src/screens/Signup'
 import Homepage from './src/screens/Homepage'
+import Quiz from './src/screens/Quiz'
+import QuizStart from './src/screens/QuizStart'
+import Result from './src/screens/Result'
+import Verification from './src/screens/Verification'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import 'react-native-gesture-handler';
@@ -29,7 +33,28 @@ const App = () => {
           {headerShown : false}
         } 
         />
+        <Stack.Screen name="verification" component={Verification} 
+         options={
+          {headerShown : false}
+        } 
+        />
+        
         <Stack.Screen name="homepage" component={Homepage} 
+         options={
+          {headerShown : false}
+        } 
+        />
+         <Stack.Screen name="quizStart" component={QuizStart} 
+         options={
+          {headerShown : false}
+        } 
+        />
+        <Stack.Screen name="quiz" component={Quiz} 
+         options={
+          {headerShown : false}
+        } 
+        />
+        <Stack.Screen name="result" component={Result} 
          options={
           {headerShown : false}
         } 

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, TextInput, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import pattern from '../../assets/pattern.png';
 import logo from '../../assets/mainlogo.png';
 import { head1, head2, formGroup, label, input, link, link2, errormessage } from '../common/formcss';
@@ -36,7 +36,7 @@ const Signup = ({ navigation }) => {
                 return;
             }
             else {
-                fetch('http://192.168.29.122:4000/signup',{
+                fetch('http://192.168.29.122:4000/verify',{
                     method : 'POST',
                     headers :{
                         'Content-Type': 'application/json'
@@ -46,18 +46,22 @@ const Signup = ({ navigation }) => {
                 .then((res) => res.json())
                 .then(
                     (data) =>{
-                        if(data.error){
-                            setErrormsg(data.error);
+                        // console.log(data);
+                        if(data.error === 'Invalid credentials'){
+                            setErrormsg('Invalid credentials');
                         }
-                        else{
-                            alert('account created successfully');
-                            navigation.navigate('login');
+                        else if(data.message === "Verification code sent to your Email"){
+                            // alert('account created successfully');
+                            // console.log(data.udata);
+                            alert(data.message);
+                            navigation.navigate('verification', {userdata : data.udata});
                         }
                     }
                 )
-                .catch((error)=>{
-                    console.log(error);
-                });
+                .catch((error) => {
+                    console.error('Network request failed:', error.message);
+                    // Handle the error here
+                  });
                 // console.log(fdata);
             }
         }
@@ -72,7 +76,7 @@ const Signup = ({ navigation }) => {
                 <ScrollView style={styles.s2}>
                     <Text style={head1}>Create a new account</Text>
                     <Text style={link2}> Already registered?&nbsp;
-                        <Text styel={link} onPress={() => navigation.navigate('login')}>Login here</Text></Text>
+                        <Text style={link} onPress={() => navigation.navigate('login')}>Login here</Text></Text>
                     {
                         errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
                     }

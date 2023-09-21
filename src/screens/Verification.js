@@ -1,43 +1,59 @@
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import pattern from '../../assets/pattern.png';
 import logo from '../../assets/mainlogo.png';
-import { head1, head2, formGroup, label, input, link, link2, errormessage } from '../common/formcss';
+import { head1, head2, formGroup, label, input, link, link2, errormessage, bwmessage } from '../common/formcss';
 import { button1 } from '../common/button';
-const Login = ({ navigation }) => {
-    const [fdata, setFdata] = useState({
-        email: '',
-        password: ''
-    })
+import { act } from 'react-test-renderer';
+const Verification = ({ navigation, route }) => {
+    const { userdata } = route.params;
 
     const [errormsg, setErrormsg] = useState(null);
+    const [userCode, setUserCode] = useState('XXXX');
+    const [actualCode, setActualCode] = useState(null);
+
+    useEffect(() => {
+        setActualCode(userdata[0]?.verificationCode)
+    }, [])
+
     const Sendtobackend = () => {
-        // console.log(fdata);
-        if (fdata.email == '' || fdata.password == '') {
-            setErrormsg("All fields are required");
+        // console.log(userCode);
+        // console.log(actualCode);
+
+        if (userCode == 'XXXX' || userCode == '') {
+            setErrormsg('Please enter the code');
             return;
         }
-        else {
-            fetch('http://192.168.29.122:4000/signin', {
+        else if (userCode == actualCode) {
+            // console.log('correct code');
+            const fdata = {
+                email: userdata[0]?.email,
+                password: userdata[0]?.password,
+                name: userdata[0]?.name,
+                dob: userdata[0]?.dob,
+            }
+
+            fetch('http://192.168.29.122:4000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(fdata)
             })
-                .then(res => res.json()).then(
-                    data => {
-                        // console.log(data);
-                        if (data.error) {
-                            setErrormsg(data.error);
-                        }
-                        else {
-                            alert('Login Successfull');
-                            navigation.navigate('homepage');
-
-                        }
+                .then(res => res.json())
+                .then(data => {
+                    if (data.message === 'User Registered Successfully') {
+                        alert(data.message);
+                        navigation.navigate('login')
                     }
-                )
+                    else {
+                        alert("Something went wrong !! Try Signing Up Again");
+                    }
+                })
+        }
+        else if (userCode != actualCode) {
+            setErrormsg('Incorrect code');
+            return;
         }
 
     }
@@ -51,47 +67,39 @@ const Login = ({ navigation }) => {
                     <Text style={styles.small1}>A place where you practice</Text>
                 </View>
                 <View style={styles.s2}>
-                    <Text style={head1}>Login</Text>
-                    <Text style={head2}>Sign in to Continue</Text>
+                    <Text style={head1}>Verification</Text>
+
+                    <Text style={bwmessage}>A code has been sent to you on your Email</Text>
+                    <Text></Text>
+
                     {
+
                         errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
                     }
+
                     <View style={formGroup}>
-                        <Text style={label}>Email</Text>
+                        <Text style={styles.label}>Code</Text>
+                        <Text></Text>
                         <TextInput style={input}
-                            placeholder="Enter your email"
-                            onPressIn={() => setErrormsg(null)}
-                            onChangeText={(text) => setFdata({ ...fdata, email: text })}
-                        />
-                    </View>
-                    <View style={formGroup}>
-                        <Text style={label}>Password</Text>
-                        <TextInput style={input}
-                            placeholder="Enter your password"
+                            placeholder="Enter 6 digit verification code"
                             onPressIn={() => setErrormsg(null)}
                             secureTextEntry={true}
-                            onChangeText={(text) => setFdata({ ...fdata, password: text })}
-                        />
+                            onChangeText={(text) => setUserCode(text)} />
                     </View>
-                    <View style={styles.fp}>
-                        <Text style={link}>Forgot Password</Text>
-                    </View>
+
                     <TouchableOpacity style={styles.buttonMargin}
                         onPress={() => Sendtobackend()}
                     >
                         <Text style={button1}
-                        >Login</Text>
+                        >Verify</Text>
                     </TouchableOpacity>
-                    <Text style={link2}>Don't have an account? &nbsp;
-                        <Text styel={link} onPress={() => navigation.navigate('signup')}>Create a new account</Text></Text>
 
                 </View>
             </View>
         </View>
     )
 }
-
-export default Login
+export default Verification
 
 const styles = StyleSheet.create({
     conatiner: {
@@ -117,6 +125,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         height: '50%',
+    },
+    label: {
+        fontSize: 20,
+        color: '#F50057',
+        fontWeight: 'bold',
     },
     small1: {
         color: '#fff',
