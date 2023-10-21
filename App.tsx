@@ -3,7 +3,8 @@ import React from 'react'
 import Welcome from './src/screens/Welcome'
 import Login from './src/screens/Login'
 import Signup from './src/screens/Signup'
-import Homepage from './src/screens/Homepage'
+import Category from './src/screens/Category'
+import Courses from './src/screens/Courses'
 import Quiz from './src/screens/Quiz'
 import QuizStart from './src/screens/QuizStart'
 import Result from './src/screens/Result'
@@ -38,8 +39,12 @@ const App = () => {
           {headerShown : false}
         } 
         /> */}
-        
-        <Stack.Screen name="homepage" component={Homepage} 
+         <Stack.Screen name="category" component={Category} 
+         options={
+          {headerShown : false}
+        } 
+        />
+        <Stack.Screen name="courses" component={Courses} 
          options={
           {headerShown : false}
         } 

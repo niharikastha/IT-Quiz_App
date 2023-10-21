@@ -20,7 +20,8 @@ const Signup = ({ navigation }) => {
     const [errormsg, setErrormsg] = useState(null);
     const Sendtobackend = () => {
         // console.log(fdata);
-        if(fdata.name == '' ||
+        if(
+        fdata.name == '' ||
         fdata.email == '' ||
         fdata.password == '' ||
         fdata.cpassword == '' ||

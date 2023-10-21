@@ -5,6 +5,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
 const Quiz = ({ navigation, route }) => {
     let data = "";
+    const { itemId, courseName } = route.params;
     const [currentQuestion, setCurrentQuestion] = useState("");
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
@@ -13,23 +14,25 @@ const Quiz = ({ navigation, route }) => {
 
     async function fetchQuestions() {
         try {
-            const response = await fetch("http://192.168.29.122:4000/api/questions");
+            const response = await fetch(`http://192.168.29.122:4000/api/questions/${itemId}`);
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
             const data = await response.json();
-            setQuestions(data.questions);
-            setCurrentQuestion(data.questions[0]);
+            // console.log(data);
+            setQuestions(data.question);
+            setCurrentQuestion(data.question[0]);
             setIsLoading(false);
-        } catch (error) {
+        } catch (error) 
+        {
             console.error("Error fetching questions:", error);
         }
     }
     useEffect(() => {
         fetchQuestions();
-        if (data) {
-            setCurrentQuestion(data.questions[0]);
-          }
+        // if (data) {
+        //     setCurrentQuestion(data.questions[0]);
+        //   }
     }, []);
 
     const handleSelectedOption = (_option) => {
@@ -64,7 +67,7 @@ const Quiz = ({ navigation, route }) => {
 
     const handlePrevPress =()=>{
         setQues(ques - 1);
-        setCurrentQuestion(questions[ques]);
+        setCurrentQuestion(questions[ques -1]);
 
     }
 
@@ -78,7 +81,7 @@ const Quiz = ({ navigation, route }) => {
         <View style={styles.container}>
             {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
-               currentQuestion && currentQuestion.question_text &&
+               questions && currentQuestion.question_text &&
                 <View style={styles.parent}>
                     <View style={styles.top}>
                         <Text style={styles.question}>Q. {currentQuestion.question_text}</Text>

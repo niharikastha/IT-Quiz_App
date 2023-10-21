@@ -33,7 +33,7 @@ const Login = ({ navigation }) => {
                         }
                         else {
                             alert('Login Successfull');
-                            navigation.navigate('homepage');
+                            navigation.navigate('Category');
 
                         }
                     }
