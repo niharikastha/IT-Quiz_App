@@ -1,13 +1,12 @@
 import { StyleSheet, Text, View, Image, TextInput, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import pattern from '../../assets/pattern.png';
-import logo from '../../assets/mainlogo.png';
 import { head1, head2, formGroup, label, input, link, link2, errormessage } from '../common/formcss';
 import { button1 } from '../common/button';
-import { useAmp } from 'next/amp';
 
 const Signup = ({ navigation }) => {
 
+    const [dob, setDob] = useState(new Date());
     const [fdata, setFdata] = useState({
         name: '',
         email: '',
@@ -20,53 +19,76 @@ const Signup = ({ navigation }) => {
     const [errormsg, setErrormsg] = useState(null);
     const Sendtobackend = () => {
         // console.log(fdata);
-        if(
-        fdata.name == '' ||
-        fdata.email == '' ||
-        fdata.password == '' ||
-        fdata.cpassword == '' ||
-        fdata.dob == '' 
-        )
-        {
+        if (
+            fdata.name == '' ||
+            fdata.email == '' ||
+            fdata.password == '' ||
+            fdata.cpassword == '' ||
+            fdata.dob == ''
+        ) {
             setErrormsg('All fields are required');
             return;
         }
+        else if (!validateEmail(fdata.email)) {
+            setErrormsg('Please enter a valid email address');
+            return;
+        } else if (!validateDob(fdata.dob)) {
+            setErrormsg('Please enter a valid date of birth');
+            return;
+        } else if (!validatePassword(fdata.password)) {
+            setErrormsg(
+                'Password must be at least 8 characters long with a number, a special character, and a capital letter'
+            );
+            return;
+        } else if (fdata.password != fdata.cpassword) {
+            setErrormsg("Passwords do not match");
+            return;
+        }
         else {
-            if (fdata.password != fdata.cpassword){
-                setErrormsg("Passowrds do not match");
-                return;
-            }
-            else {
-                fetch('http://192.168.29.122:4000/verify',{
-                    method : 'POST',
-                    headers :{
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(fdata)
-                })
+            fetch('http://192.168.29.122:4000/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(fdata)
+            })
                 .then((res) => res.json())
                 .then(
-                    (data) =>{
+                    (data) => {
                         // console.log(data);
-                        if(data.error === 'Invalid credentials'){
+                        if (data.error === 'Invalid credentials') {
                             setErrormsg('Invalid credentials');
                         }
-                        else if(data.message === "Verification code sent to your Email"){
+                        else if (data.message === "Verification code sent to your Email") {
                             // alert('account created successfully');
                             // console.log(data.udata);
                             alert(data.message);
-                            navigation.navigate('verification', {userdata : data.udata});
+                            navigation.navigate('verification', { userdata: data.udata });
                         }
                     }
                 )
                 .catch((error) => {
                     console.error('Network request failed:', error.message);
                     // Handle the error here
-                  });
-                // console.log(fdata);
-            }
+                });
+            // console.log(fdata);
         }
     }
+
+    const validateEmail = (email) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    };
+
+    const validateDob = (dob) => {
+        const re = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/(19[0-9]{2}|201[0-8])$/;
+        return re.test(String(dob));
+    };
+
+    const validatePassword = (password) => {
+        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return re.test(String(password));
+    };
     return (
         <View style={styles.container}>
             <Image style={styles.patternbg} source={pattern} />
@@ -84,14 +106,14 @@ const Signup = ({ navigation }) => {
                     <View style={formGroup}>
                         <Text style={label}>Name</Text>
                         <TextInput style={input} placeholder='Enter your Name'
-                            onPressIn ={()=> setErrormsg(null)}
+                            onPressIn={() => setErrormsg(null)}
                             onChangeText={(text) => setFdata({ ...fdata, name: text })}
                         />
                     </View>
                     <View style={formGroup}>
                         <Text style={label}>Email</Text>
                         <TextInput style={input} placeholder='Enter your Email'
-                            onPressIn ={()=> setErrormsg(null)}
+                            onPressIn={() => setErrormsg(null)}
                             onChangeText={(text) => setFdata({ ...fdata, email: text })}
 
                         />
@@ -99,7 +121,7 @@ const Signup = ({ navigation }) => {
                     <View style={formGroup}>
                         <Text style={label}>DOB</Text>
                         <TextInput style={input} placeholder='Enter your date of birth'
-                            onPressIn ={()=> setErrormsg(null)}
+                            onPressIn={() => setErrormsg(null)}
                             onChangeText={(text) => setFdata({ ...fdata, dob: text })}
                         />
                     </View>
@@ -107,18 +129,18 @@ const Signup = ({ navigation }) => {
                         <Text style={label}>Password</Text>
                         <TextInput style={input} placeholder='Enter your password'
                             secureTextEntry={true}
-                            onPressIn ={()=> setErrormsg(null)}
+                            onPressIn={() => setErrormsg(null)}
                             onChangeText={(text) => setFdata({ ...fdata, password: text })}
                         />
                     </View>
                     <View style={formGroup}>
                         <Text style={label}>Confirm Password</Text>
                         <TextInput style={input} placeholder='Confirm your password'
-                            onPressIn ={()=> setErrormsg(null)}
+                            onPressIn={() => setErrormsg(null)}
                             onChangeText={(text) => setFdata({ ...fdata, cpassword: text })}
                         />
                     </View>
-                
+
                     <TouchableOpacity style={styles.buttonMargin}
                         onPress={() => {
                             Sendtobackend();
