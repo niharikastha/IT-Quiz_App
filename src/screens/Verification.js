@@ -42,7 +42,7 @@ const Verification = ({ navigation, route }) => {
             })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.message === 'User Registered Successfully') {
+                    if (data.message === 'User registered successfully') {
                         alert(data.message);
                         navigation.navigate('login')
                     }
@@ -93,9 +93,15 @@ const Verification = ({ navigation, route }) => {
                         <Text style={button1}
                         >Verify</Text>
                     </TouchableOpacity>
-
+                    <TouchableOpacity style={styles.buttonMargin}
+                        onPress={() => navigation.navigate('welcome')}
+                    >
+                        <Text style={button1}
+                        >Back</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
+            
         </View>
     )
 }

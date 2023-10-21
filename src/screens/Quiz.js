@@ -1,62 +1,71 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
-const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
-const Quiz = ({ navigation , route}) => {
-    const {data} = route.params;
-
-    const [questions, setQuestions] = useState();
-    const [ques, setQues] = useState(0);
-    const [options, setOptions] = useState([]);
-    const [score, setScore] = useState(0);
+const Quiz = ({ navigation, route }) => {
+    let data = "";
+    const [currentQuestion, setCurrentQuestion] = useState("");
+    const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
+    const [ques, setQues] = useState(1);
+    const [score, setScore] = useState(0);
 
-    const getQuiz = async () => {
-        const url = "http://192.168.29.122:4000/api/questions";
-        const res = await fetch(url);
-        const data = await res.json();
-        // console.log(data.results[0]);
-        setQuestions(data.results);
-        setOptions(generateOptionsAndShuffle(data.results[0]))
-        setIsLoading(false)
-    };
+    async function fetchQuestions() {
+        try {
+            const response = await fetch("http://192.168.29.122:4000/api/questions");
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const data = await response.json();
+            setQuestions(data.questions);
+            setCurrentQuestion(data.questions[0]);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error fetching questions:", error);
+        }
+    }
     useEffect(() => {
-        getQuiz();
+        fetchQuestions();
+        if (data) {
+            setCurrentQuestion(data.questions[0]);
+          }
     }, []);
-    const handleNextPress = () => {
-        setQues(ques + 1)
-        setOptions(generateOptionsAndShuffle(questions[ques + 1]))
-
-    }
-
-    const generateOptionsAndShuffle = (_question) => {
-        const options = [..._question.incorrect_answers]
-        options.push(_question.correct_answer)
-        shuffleArray(options)
-        return options;
-    }
 
     const handleSelectedOption = (_option) => {
-        if (_option === questions[ques].correct_answer) {
-            setScore(score + 4)
-        }
-        if (_option === questions[ques].incorrect_answers) {
-            setScore(score - 1)
-        }
-        if (ques !== 9) {
+        if (ques !== 5) {
             setQues(ques + 1)
-            setOptions(generateOptionsAndShuffle(questions[ques + 1]))
         }
-        if (ques === 9) {
+        if (ques === 5) {
             handleShowResult()
         }
+        if (_option == currentQuestion.correct_answer) {
+            setScore(score + 4)
+            handleNextPress()
+        }
+        else {
+            setScore(score - 1)
+            handleNextPress()
+        }
+    }
+    const handleNextPress = () => {
+        setQues(ques + 1);
+        if (ques === 5) {
+          handleShowResult();
+        } else { 
+            setCurrentQuestion(questions[ques]);
+        }
+    }
+
+    const handleSkipPress =()=>{
+        setQues(ques + 1);
+        setCurrentQuestion(questions[ques]);
+    }
+
+    const handlePrevPress =()=>{
+        setQues(ques - 1);
+        setCurrentQuestion(questions[ques]);
+
     }
 
     const handleShowResult = () => {
@@ -64,47 +73,53 @@ const Quiz = ({ navigation , route}) => {
             score: score
         });
     }
+
     return (
         <View style={styles.container}>
-            {isLoading ? <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View> :
-                questions &&
+            {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
+               currentQuestion && currentQuestion.question_text &&
                 <View style={styles.parent}>
                     <View style={styles.top}>
-                        <Text style={styles.question}>Q. {decodeURIComponent(questions[ques].question)}</Text>
+                        <Text style={styles.question}>Q. {currentQuestion.question_text}</Text>
                     </View>
                     <View style={styles.options}>
-                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(options[0])}>
-                            <Text style={styles.option}>{decodeURIComponent(options[0])}</Text>
+                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(currentQuestion.options[0])}>
+                            <Text style={styles.option}>{currentQuestion.options[0]}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(options[1])}>
-                            <Text style={styles.option}>{decodeURIComponent(options[1])}</Text>
+                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(currentQuestion.options[1])}>
+                            <Text style={styles.option}>{currentQuestion.options[1]}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(options[2])}>
-                            <Text style={styles.option}>{decodeURIComponent(options[2])}</Text>
+                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(currentQuestion.options[2])}>
+                            <Text style={styles.option}>{currentQuestion.options[2]}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(options[3])}>
-                            <Text style={styles.option}>{decodeURIComponent(options[3])}</Text>
+                        <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(currentQuestion.options[3])}>
+                            <Text style={styles.option}>{currentQuestion.options[3]}</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.bottom}>
-                        {/* <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>PREVIOUS</Text>
-                        </TouchableOpacity> */}
-                        {ques !== 9 && <TouchableOpacity style={styles.button} onPress={handleNextPress}>
+                        {ques !==0 && <TouchableOpacity style={styles.button} onPress={handlePrevPress}>
+                            <Text style={styles.buttonText}>PREV</Text>
+                        </TouchableOpacity>}
+                         {ques !== 5 && <TouchableOpacity style={styles.button} onPress={handleSkipPress}>
                             <Text style={styles.buttonText}>SKIP</Text>
                         </TouchableOpacity>}
-                        {ques === 9 && <TouchableOpacity style={styles.button} onPress={handleShowResult}>
+                         {ques !== 5 && <TouchableOpacity style={styles.button} onPress={handleNextPress}>
+                            <Text style={styles.buttonText}>NEXT</Text>
+                        </TouchableOpacity>}
+                        {ques === 5 && <TouchableOpacity style={styles.button} onPress={handleShowResult}>
                             <Text style={styles.buttonText}>SHOW RESULTS</Text>
                         </TouchableOpacity>}
 
                     </View>
                 </View>
+            )
             }
         </View>
     )
-
 }
+
+export default Quiz
 
 const styles = StyleSheet.create({
     container: {
@@ -146,7 +161,7 @@ const styles = StyleSheet.create({
     option: {
         fontSize: 18,
         fontWeight: '500',
-        color: 'white',
+        color: 'black',
     },
     optionButton: {
         paddingVertical: 12,
@@ -159,5 +174,3 @@ const styles = StyleSheet.create({
         height: '100%',
     }
 })
-
-export default Quiz

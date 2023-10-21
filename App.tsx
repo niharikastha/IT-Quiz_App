@@ -18,7 +18,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="welcome" component={Welcome} 
+        {/* <Stack.Screen name="welcome" component={Welcome} 
           options={
             {headerShown : false}
           } 
@@ -37,7 +37,7 @@ const App = () => {
          options={
           {headerShown : false}
         } 
-        />
+        /> */}
         
         <Stack.Screen name="homepage" component={Homepage} 
          options={

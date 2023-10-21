@@ -22,10 +22,10 @@ const Result = ({ navigation, route }) => {
                 />
             </View >
             <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.button}>
+                <TouchableOpacity onPress={() => navigation.navigate('homepage')} style={styles.button}>
                     <Text style={styles.buttonText}>Homepage</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.button}>
+                <TouchableOpacity onPress={() => navigation.navigate('homepage')} style={styles.button}>
                     <Text style={styles.buttonText}>Dashboard</Text>
                 </TouchableOpacity>
             </View>
