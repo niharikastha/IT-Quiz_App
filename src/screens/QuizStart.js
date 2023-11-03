@@ -1,12 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Title from '../Components/title';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuizStart = ({ navigation, route }) => {
-    const { data } = route.params;
+    const { itemId, courseName } = route.params;
+    const [score, setScore] = useState(0);
+    const [isLoading, setIsLoading] = useState(true)
+
+    const [quizData, setQuizData] = useState({
+        course_id: itemId,
+        response_at: new Date(),
+        maxtime: 200,
+        Score: score,
+    });
+    const [errormsg, setErrormsg] = useState(null);
+
+    async function startQuiz() {
+        try {
+
+            const authToken = await AsyncStorage.getItem('authToken');
+            if (!authToken) {
+                navigation.navigate('login');
+                return;
+            }
+            // console.log('AuthToken:', authToken);
+
+            await fetch(`http://172.25.1.231:4000/api/quiz/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${authToken}`,
+                },
+                body: JSON.stringify(quizData)
+            })
+                .then((res) => res.json())
+                .then(
+                    (data) => {
+                        console.log(data);
+                        if (data.error) {
+                            setErrormsg('Network error');
+                        }
+                        else {
+                            // console.log(data.udata);
+                            navigation.navigate('quiz', { itemId: itemId, courseName: courseName });
+                        }
+                    }
+                )
+                .catch((error) => {
+                    console.error('Network request failed:', error.message);
+                });
+        }
+        catch (error) {
+            console.error("Error fetching questions:", error.message);
+        }
+    }
+
+
+
     return (
         <View style={styles.container}>
-            <Title titleText={data} />
+            <Title titleText={courseName} />
             <View style={styles.bannerContainer}>
                 <Image source={{
                     uri: 'https://cdni.iconscout.com/illustration/premium/thumb/giving-different-feedback-and-review-in-websites-2112230-1779230.png',
@@ -40,7 +94,7 @@ const QuizStart = ({ navigation, route }) => {
                     </Text>
                 </View>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate("quiz",{data})} style={styles.button}>
+            <TouchableOpacity onPress={() => { startQuiz(); }} style={styles.button}>
                 <Text style={styles.buttonText}>
                     Start
                 </Text>
@@ -101,8 +155,8 @@ const styles = StyleSheet.create({
     rule: {
         fontSize: 14,
         marginBottom: 10,
-        color:'black'
-      },
+        color: 'black'
+    },
 });
 
 export default QuizStart

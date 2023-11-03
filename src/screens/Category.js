@@ -3,6 +3,7 @@ import React from 'react'
 import { head1 } from '../common/formcss';
 import { button1 } from '../common/button';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
 
 const Category = ({ navigation }) => {
@@ -13,9 +14,26 @@ const Category = ({ navigation }) => {
 
     async function fetchCategory() {
         try {
-            const response = await fetch("http://192.168.29.122:4000/category");
+            const authToken = await AsyncStorage.getItem('authToken');
+            // console.log(authToken)
+            if (!authToken) {
+                navigation.navigate('login');
+                // console.log("error")
+                return;
+            }
+            const response = await fetch("http://172.25.1.231:4000/category",{
+                headers:{
+                    Authorization: `Bearer ${authToken}`,
+                }
+            });
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                if (response.status === 401) {
+                    alert('Please login with correct details.')
+                    navigation.navigate('login');
+                } else {
+                    alert('Please login with correct details.')
+                    console.error("Network response was not ok:", response.status);
+                }
             }
             const data = await response.json();
             // console.log(data)

@@ -4,36 +4,23 @@ import { head1 } from '../common/formcss';
 import { button1 } from '../common/button';
 import pattern from '../../assets/pattern.png';
 import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 
 const Courses = ({ navigation, route }) => {
   const { itemId, categoryName } = route.params;
   const [isLoading, setIsLoading] = useState(true);
-  const [course, setCourse] = useState("");
+  const [level, setLevel] = useState("");
 
 
   async function fetchCourses() {
     try {
-      const authToken = await AsyncStorage.getItem('authToken');
-            // console.log(authToken)
-            if (!authToken) {
-                navigation.navigate('login');
-                // console.log("error")
-                return;
-            }
-          
-      const response = await fetch(`http://172.25.1.231:4000/courses/${itemId}`,{
-        headers:{
-          Authorization: `Bearer ${authToken}`,
-      }
-      });
+      const response = await fetch(`http://172.25.1.231:4000/level/${itemId}`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
       // console.log(data)
-      setCourse(data.course);
+      setLevel(data.level);
       setIsLoading(false);
       // console.log(course);
 
@@ -49,15 +36,15 @@ const Courses = ({ navigation, route }) => {
     <View style={styles.container}>
       {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
         <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
-        course && course[0] &&
+        level && level[0] &&
 
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={head1}>Courses</Text>
+            <Text style={head1}>Level</Text>
           </View>
           <ScrollView>
             <View style={styles.courseContainer}>
-              {course.map((item) => (
+              {level.map((item) => (
                 <View style={styles.courseBlock} key={item._id}>
                   <TouchableOpacity style={styles.courseNameContainer} onPress={() => navigation.navigate('quizStart', { itemId: item._id, courseName: item.course_name })}>
                     <Text style={styles.courseName}>{item.course_name}</Text>

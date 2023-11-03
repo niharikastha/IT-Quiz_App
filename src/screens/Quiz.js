@@ -2,19 +2,33 @@ import React from 'react';
 import { useEffect } from 'react';
 import { useState, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Quiz = ({ navigation, route }) => {
-    let data = "";
     const { itemId, courseName } = route.params;
+    const [remainingTime, setRemainingTime] = useState(20); 
     const [currentQuestion, setCurrentQuestion] = useState("");
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
-    const [ques, setQues] = useState(1);
+    const [ques, setQues] = useState(0);
     const [score, setScore] = useState(0);
+    const [corr, setCorr] = useState(0);
+    const [incorr, setIncorr] = useState(0);
+    let selectedAnswer = "";
+    
 
     async function fetchQuestions() {
-        try {
-            const response = await fetch(`http://192.168.29.122:4000/api/questions/${itemId}`);
+        try {            
+            const authToken = await AsyncStorage.getItem('authToken');
+            if (!authToken) {
+                navigation.navigate('login');
+                return;
+            }
+            const response = await fetch(`http://172.25.1.231:4000/api/questions/${itemId}`,{
+                headers:{
+                    Authorization: `Bearer ${authToken}`,
+                }
+            });
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
@@ -23,8 +37,7 @@ const Quiz = ({ navigation, route }) => {
             setQuestions(data.question);
             setCurrentQuestion(data.question[0]);
             setIsLoading(false);
-        } catch (error) 
-        {
+        } catch (error) {
             console.error("Error fetching questions:", error);
         }
     }
@@ -35,45 +48,119 @@ const Quiz = ({ navigation, route }) => {
         //   }
     }, []);
 
+    useEffect(() => {
+        const timer = setInterval(decrementTime, 1000);
+        return () => {
+            clearInterval(timer);
+        };
+    }, [remainingTime]);
+
+    const decrementTime = () => {
+        if (remainingTime > 0) {
+            setRemainingTime(remainingTime - 1);
+        } else {
+            handleNextPress();
+        }
+    };
+
+    const resetTimer = () => {
+        setRemainingTime(20);
+    }
+
+
+    
+
+    async function responsetrack() {
+        const authToken = await AsyncStorage.getItem('authToken');
+        const response = {
+            quiz_id: itemId, 
+            user_id: authToken,          
+            question_id: currentQuestion._id,  
+            response_at: new Date(),   
+            chosen_answer: selectedAnswer,  
+            correct_answer: currentQuestion.correct_answer,
+        };
+        // console.log(response);
+            await fetch("http://172.25.1.231:4000/api/quiz-response/", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(response),
+        })
+            .then((res) => res.json())
+            .then(
+                (data) => {
+                    console.log(data);
+                }
+            )
+            .catch((error) => {
+                console.error('Network request failed:', error.message);
+            });
+    }
+
+
+
+
     const handleSelectedOption = (_option) => {
-        if (ques !== 5) {
+       
+       selectedAnswer = _option;
+        if (ques !== 4) {
             setQues(ques + 1)
+            if (_option == currentQuestion.correct_answer) {
+                setScore(score + 4)
+                setCorr(corr + 1)
+                handleNextPress()
+            }
+            else {
+                setScore(score - 1)
+                setIncorr(incorr + 1 )
+                handleNextPress()
+            }
         }
-        if (ques === 5) {
+        if (ques === 4) {
+            if (_option == currentQuestion.correct_answer) {
+                setScore(score + 4)
+                setCorr (corr + 1)
+            }
+            else {
+                setScore(score - 1)
+                setIncorr(incorr + 1)
+            }
             handleShowResult()
-        }
-        if (_option == currentQuestion.correct_answer) {
-            setScore(score + 4)
-            handleNextPress()
-        }
-        else {
-            setScore(score - 1)
-            handleNextPress()
         }
     }
     const handleNextPress = () => {
-        setQues(ques + 1);
-        if (ques === 5) {
-          handleShowResult();
-        } else { 
-            setCurrentQuestion(questions[ques]);
+        responsetrack();
+        resetTimer();
+        if ((ques) === 4) {
+            // setQues(ques + 1);
+            handleShowResult();
+        } else {
+            setCurrentQuestion(questions[ques + 1]);
+            setQues(ques + 1);
+
         }
     }
 
-    const handleSkipPress =()=>{
+    const handleSkipPress = () => {
+        resetTimer();
+        setCurrentQuestion(questions[ques + 1]);
         setQues(ques + 1);
-        setCurrentQuestion(questions[ques]);
+
     }
 
-    const handlePrevPress =()=>{
+    const handlePrevPress = () => {
+        resetTimer();
+        setCurrentQuestion(questions[ques - 1]);
         setQues(ques - 1);
-        setCurrentQuestion(questions[ques -1]);
 
     }
 
     const handleShowResult = () => {
         navigation.navigate('result', {
-            score: score
+            score: score, correct : corr, incorrect : incorr
         });
     }
 
@@ -81,10 +168,24 @@ const Quiz = ({ navigation, route }) => {
         <View style={styles.container}>
             {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
-               questions && currentQuestion.question_text &&
+                questions && currentQuestion.question_text &&
                 <View style={styles.parent}>
+                    <View style={styles.timer}>
+                        <View style={styles.question_no_container}>
+                            <Text style={styles.question_no}>{ques + 1}</Text>
+                        </View>
+                        <View style={styles.timerContainer}>
+                            <View style={styles.timerBox}>
+                                <Text style={styles.timerText}>00</Text>
+                            </View>
+                            <Text style={styles.timerSeparator}>:</Text>
+                            <View style={styles.timerBox}>
+                                <Text style={styles.timerText}>{remainingTime}</Text>
+                            </View>
+                        </View>
+                    </View>
                     <View style={styles.top}>
-                        <Text style={styles.question}>Q. {currentQuestion.question_text}</Text>
+                        <Text style={styles.question}>{currentQuestion.question_text}</Text>
                     </View>
                     <View style={styles.options}>
                         <TouchableOpacity style={styles.optionButton} onPress={() => handleSelectedOption(currentQuestion.options[0])}>
@@ -101,16 +202,16 @@ const Quiz = ({ navigation, route }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.bottom}>
-                        {ques !==0 && <TouchableOpacity style={styles.button} onPress={handlePrevPress}>
+                        {/* {ques !== 0 && <TouchableOpacity style={styles.button} onPress={handlePrevPress}>
                             <Text style={styles.buttonText}>PREV</Text>
-                        </TouchableOpacity>}
-                         {ques !== 5 && <TouchableOpacity style={styles.button} onPress={handleSkipPress}>
+                        </TouchableOpacity>} */}
+                        {ques !== 4 && <TouchableOpacity style={styles.button} onPress={handleSkipPress}>
                             <Text style={styles.buttonText}>SKIP</Text>
                         </TouchableOpacity>}
-                         {ques !== 5 && <TouchableOpacity style={styles.button} onPress={handleNextPress}>
+                        {ques !== 4 && <TouchableOpacity style={styles.button} onPress={handleNextPress}>
                             <Text style={styles.buttonText}>NEXT</Text>
                         </TouchableOpacity>}
-                        {ques === 5 && <TouchableOpacity style={styles.button} onPress={handleShowResult}>
+                        {ques === 4 && <TouchableOpacity style={styles.button} onPress={handleShowResult}>
                             <Text style={styles.buttonText}>SHOW RESULTS</Text>
                         </TouchableOpacity>}
 
@@ -132,6 +233,46 @@ const styles = StyleSheet.create({
     },
     top: {
         marginVertical: 16,
+    },
+    timer: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    timerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    timerBox: {
+        width: 30, // Adjust the width as needed
+        height: 30, // Adjust the height as needed
+        backgroundColor: '#F50057', // Color of the box
+        borderRadius: 5, // Adjust the border radius as needed
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    timerText: {
+        color: 'white',
+        fontSize: 16, // Adjust the font size as needed
+        fontWeight: 'bold',
+    },
+    timerSeparator: {
+        fontSize: 16, // Adjust the font size as needed
+        marginHorizontal: 5, // Adjust the spacing as needed
+    },
+    question_no_container: {
+        width: 50,
+        height: 50,
+        backgroundColor: "#F50057",
+        borderRadius: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 150,
+    },
+    question_no: {
+        alignContent: "center",
+        fontWeight: "900",
+        fontSize: 20,
     },
     options: {
         marginVertical: 16,

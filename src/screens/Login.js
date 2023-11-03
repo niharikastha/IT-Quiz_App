@@ -4,6 +4,8 @@ import pattern from '../../assets/pattern.png';
 import logo from '../../assets/mainlogo.png';
 import { head1, head2, formGroup, label, input, link, link2, errormessage } from '../common/formcss';
 import { button1 } from '../common/button';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Login = ({ navigation }) => {
     const [fdata, setFdata] = useState({
         email: '',
@@ -18,7 +20,7 @@ const Login = ({ navigation }) => {
             return;
         }
         else {
-            fetch('http://192.168.29.122:4000/signin', {
+            fetch('http://172.25.1.231:4000/signin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -28,13 +30,20 @@ const Login = ({ navigation }) => {
                 .then(res => res.json()).then(
                     data => {
                         // console.log(data);
+                        // console.log(data.token)
+
                         if (data.error) {
                             setErrormsg(data.error);
+                            console.log(data);
+                            alert("Please enter correct details.")
                         }
                         else {
+                            const authToken = data.token;
+                            AsyncStorage.setItem('authToken', authToken);
                             alert('Login Successfull');
-                            navigation.navigate('Category');
-
+                            navigation.navigate('category');
+                            // console.log(authToken);
+                            // console.log(data);
                         }
                     }
                 )
@@ -83,8 +92,8 @@ const Login = ({ navigation }) => {
                         >Login</Text>
                     </TouchableOpacity>
                     <Text style={link2}>Don't have an account? &nbsp;
-                        <Text styel={link} onPress={() => navigation.navigate('signup')}>Create a new account</Text></Text>
-
+                        <Text styel={link} onPress={() => navigation.navigate('signup')}>Create a new account</Text>
+                    </Text>
                 </View>
             </View>
         </View>

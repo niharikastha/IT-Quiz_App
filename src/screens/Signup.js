@@ -6,7 +6,6 @@ import { button1 } from '../common/button';
 
 const Signup = ({ navigation }) => {
 
-    const [dob, setDob] = useState(new Date());
     const [fdata, setFdata] = useState({
         name: '',
         email: '',
@@ -33,7 +32,7 @@ const Signup = ({ navigation }) => {
             setErrormsg('Please enter a valid email address');
             return;
         } else if (!validateDob(fdata.dob)) {
-            setErrormsg('Please enter a valid date of birth');
+            setErrormsg('Please enter a valid date of birth. DOB should be less than 01/01/2019');
             return;
         } else if (!validatePassword(fdata.password)) {
             setErrormsg(
@@ -45,7 +44,7 @@ const Signup = ({ navigation }) => {
             return;
         }
         else {
-            fetch('http://192.168.29.122:4000/verify', {
+            fetch('http://172.25.1.231:4000/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -55,8 +54,9 @@ const Signup = ({ navigation }) => {
                 .then((res) => res.json())
                 .then(
                     (data) => {
-                        // console.log(data);
+                        console.log(data);
                         if (data.error === 'Invalid credentials') {
+                            alert('Invalid Credentials')
                             setErrormsg('Invalid credentials');
                         }
                         else if (data.message === "Verification code sent to your Email") {
@@ -81,7 +81,7 @@ const Signup = ({ navigation }) => {
     };
 
     const validateDob = (dob) => {
-        const re = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/(19[0-9]{2}|201[0-8])$/;
+        const re = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/(19[0-9]{2}|200[0-8])$/;
         return re.test(String(dob));
     };
 

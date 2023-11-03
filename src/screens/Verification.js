@@ -11,6 +11,7 @@ const Verification = ({ navigation, route }) => {
     const [errormsg, setErrormsg] = useState(null);
     const [userCode, setUserCode] = useState('XXXX');
     const [actualCode, setActualCode] = useState(null);
+    // const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         setActualCode(userdata[0]?.verificationCode)
@@ -33,7 +34,7 @@ const Verification = ({ navigation, route }) => {
                 dob: userdata[0]?.dob,
             }
 
-            fetch('http://192.168.29.122:4000/signup', {
+            fetch('http://172.25.1.231:4000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -42,6 +43,7 @@ const Verification = ({ navigation, route }) => {
             })
                 .then(res => res.json())
                 .then(data => {
+                    // setIsLoading(false);
                     if (data.message === 'User registered successfully') {
                         alert(data.message);
                         navigation.navigate('login')
@@ -53,62 +55,68 @@ const Verification = ({ navigation, route }) => {
         }
         else if (userCode != actualCode) {
             setErrormsg('Incorrect code');
+            alert('Incorrect Code')
             return;
         }
 
     }
     return (
         <View style={styles.container}>
-            <Image style={styles.patternbg} source={pattern} />
-            <View style={styles.conatiner1}>
-                <View style={styles.s1}>
-                    <Image style={styles.logo} source={logo} />
-                    <Text style={styles.h1} onPress={() => navigation.navigate('welcome')}>Used2, Inc.</Text>
-                    <Text style={styles.small1}>A place where you practice</Text>
-                </View>
-                <View style={styles.s2}>
-                    <Text style={head1}>Verification</Text>
+            {/* {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
+                <View> */}
+                    <Image style={styles.patternbg} source={pattern} />
+                    <View style={styles.conatiner1}>
+                        <View style={styles.s1}>
+                            <Image style={styles.logo} source={logo} />
+                            <Text style={styles.h1} onPress={() => navigation.navigate('welcome')}>Used2, Inc.</Text>
+                            <Text style={styles.small1}>A place where you practice</Text>
+                        </View>
+                        <View style={styles.s2}>
+                            <Text style={head1}>Verification</Text>
 
-                    <Text style={bwmessage}>A code has been sent to you on your Email</Text>
-                    <Text></Text>
+                            <Text style={bwmessage}>A code has been sent to you on your Email</Text>
+                            <Text></Text>
 
-                    {
+                            {
 
-                        errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
-                    }
+                                errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
+                            }
 
-                    <View style={formGroup}>
-                        <Text style={styles.label}>Code</Text>
-                        <Text></Text>
-                        <TextInput style={input}
-                            placeholder="Enter 6 digit verification code"
-                            onPressIn={() => setErrormsg(null)}
-                            secureTextEntry={true}
-                            onChangeText={(text) => setUserCode(text)} />
+                            <View style={formGroup}>
+                                <Text style={styles.label}>Code</Text>
+                                <Text></Text>
+                                <TextInput style={input}
+                                    placeholder="Enter 6 digit verification code"
+                                    onPressIn={() => setErrormsg(null)}
+                                    secureTextEntry={true}
+                                    onChangeText={(text) => setUserCode(text)} />
+                            </View>
+
+                            <TouchableOpacity style={styles.buttonMargin}
+                                onPress={() => Sendtobackend()}
+                            >
+                                <Text style={button1}
+                                >Verify</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.buttonMargin}
+                                onPress={() => navigation.navigate('welcome')}
+                            >
+                                <Text style={button1}
+                                >Back</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-
-                    <TouchableOpacity style={styles.buttonMargin}
-                        onPress={() => Sendtobackend()}
-                    >
-                        <Text style={button1}
-                        >Verify</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.buttonMargin}
-                        onPress={() => navigation.navigate('welcome')}
-                    >
-                        <Text style={button1}
-                        >Back</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-            
+                {/* </View>
+            )
+            } */}
         </View>
     )
 }
 export default Verification
 
 const styles = StyleSheet.create({
-    conatiner: {
+    container: {
         width: '100%',
         height: '100%',
     },
