@@ -10,36 +10,39 @@ const Category = ({ navigation }) => {
     let data = "";
     const [category, setCategory] = useState("");
     const [isLoading, setIsLoading] = useState(true)
+    let authToken = '';
 
 
     async function fetchCategory() {
         try {
             const authToken = await AsyncStorage.getItem('authToken');
-            // console.log(authToken)
-            if (!authToken) {
+            // console.log(authToken);
+
+            if (authToken === null || authToken === undefined) {
+                alert('Please login to access categories');
                 navigation.navigate('login');
-                // console.log("error")
                 return;
             }
-            const response = await fetch("http://172.25.1.231:4000/category",{
+            const response = await fetch("http://192.168.29.122:4000/category",{
                 headers:{
                     Authorization: `Bearer ${authToken}`,
                 }
             });
             if (!response.ok) {
                 if (response.status === 401) {
-                    alert('Please login with correct details.')
+                    alert('Please login with correct details')
                     navigation.navigate('login');
                 } else {
-                    alert('Please login with correct details.')
+                    alert('Network response was not ok')
                     console.error("Network response was not ok:", response.status);
                 }
             }
             const data = await response.json();
             // console.log(data)
-            setCategory(data.cate_gory);
+            setCategory(data.data);
             // console.log(category)
-            // console.log(category[0].category_name)
+            // console.log(category[0])
+            // console.log(category[0].category_name);
             setIsLoading(false);
 
         } catch (error) {

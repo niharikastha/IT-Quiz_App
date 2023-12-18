@@ -44,7 +44,7 @@ const Signup = ({ navigation }) => {
             return;
         }
         else {
-            fetch('http://172.25.1.231:4000/verify', {
+            fetch('http://192.168.29.122:4000/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -12,7 +12,6 @@ const Courses = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [course, setCourse] = useState("");
 
-
   async function fetchCourses() {
     try {
       const authToken = await AsyncStorage.getItem('authToken');
@@ -23,7 +22,7 @@ const Courses = ({ navigation, route }) => {
                 return;
             }
           
-      const response = await fetch(`http://172.25.1.231:4000/courses/${itemId}`,{
+      const response = await fetch(`http://192.168.29.122:4000/courses/${itemId}`,{
         headers:{
           Authorization: `Bearer ${authToken}`,
       }
@@ -32,10 +31,8 @@ const Courses = ({ navigation, route }) => {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      // console.log(data)
-      setCourse(data.course);
+      setCourse(data.data);
       setIsLoading(false);
-      // console.log(course);
 
     } catch (error) {
       console.error("Error fetching courses:", error);

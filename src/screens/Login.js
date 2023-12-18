@@ -20,7 +20,7 @@ const Login = ({ navigation }) => {
             return;
         }
         else {
-            fetch('http://172.25.1.231:4000/signin', {
+            fetch('http://192.168.29.122:4000/signin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -38,8 +38,10 @@ const Login = ({ navigation }) => {
                             alert("Please enter correct details.")
                         }
                         else {
-                            const authToken = data.token;
+                            // console.log(data);
+                            const authToken = data.data;
                             AsyncStorage.setItem('authToken', authToken);
+                            // let tok = AsyncStorage.getItem(authToken);
                             alert('Login Successfull');
                             navigation.navigate('category');
                             // console.log(authToken);

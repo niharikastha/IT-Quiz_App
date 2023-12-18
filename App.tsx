@@ -9,6 +9,7 @@ import Quiz from './src/screens/Quiz'
 import QuizStart from './src/screens/QuizStart'
 import Result from './src/screens/Result'
 import Verification from './src/screens/Verification'
+import Review from './src/screens/Review'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import 'react-native-gesture-handler';
@@ -60,6 +61,11 @@ const App = () => {
         } 
         />
         <Stack.Screen name="result" component={Result} 
+         options={
+          {headerShown : false}
+        } 
+        />
+         <Stack.Screen name="review" component={Review} 
          options={
           {headerShown : false}
         } 

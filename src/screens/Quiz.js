@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Quiz = ({ navigation, route }) => {
     const { itemId, courseName } = route.params;
+    // console.log(itemId)
     const [remainingTime, setRemainingTime] = useState(20); 
     const [currentQuestion, setCurrentQuestion] = useState("");
     const [questions, setQuestions] = useState([]);
@@ -18,36 +19,43 @@ const Quiz = ({ navigation, route }) => {
     
 
     async function fetchQuestions() {
-        try {            
+        try {
             const authToken = await AsyncStorage.getItem('authToken');
             if (!authToken) {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://172.25.1.231:4000/api/questions/${itemId}`,{
-                headers:{
+            const response = await fetch(`http://192.168.29.122:4000/api/questions/${itemId}`, {
+                headers: {
                     Authorization: `Bearer ${authToken}`,
-                }
+                },
             });
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
             const data = await response.json();
             // console.log(data);
-            setQuestions(data.question);
-            setCurrentQuestion(data.question[0]);
+            setQuestions(data.data);
             setIsLoading(false);
         } catch (error) {
             console.error("Error fetching questions:", error);
+            setIsLoading(false);
         }
     }
+    
     useEffect(() => {
         fetchQuestions();
-        // if (data) {
-        //     setCurrentQuestion(data.questions[0]);
-        //   }
     }, []);
-
+    
+    // Use useEffect to set currentQuestion when questions state changes
+    useEffect(() => {
+        if (questions.length > 0) {
+            setCurrentQuestion(questions[0]);
+        }
+    }, [questions]);
+    
+    // Rest of your component code remains unchanged
+    
     useEffect(() => {
         const timer = setInterval(decrementTime, 1000);
         return () => {
@@ -81,7 +89,7 @@ const Quiz = ({ navigation, route }) => {
             correct_answer: currentQuestion.correct_answer,
         };
         // console.log(response);
-            await fetch("http://172.25.1.231:4000/api/quiz-response/", {
+            await fetch("http://192.168.29.122:4000/api/quiz-response/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,7 +100,7 @@ const Quiz = ({ navigation, route }) => {
             .then((res) => res.json())
             .then(
                 (data) => {
-                    console.log(data);
+                    // console.log(data);
                 }
             )
             .catch((error) => {
@@ -160,7 +168,7 @@ const Quiz = ({ navigation, route }) => {
 
     const handleShowResult = () => {
         navigation.navigate('result', {
-            score: score, correct : corr, incorrect : incorr
+            score: score, correct : corr, incorrect : incorr, courseId : itemId 
         });
     }
 
@@ -168,7 +176,7 @@ const Quiz = ({ navigation, route }) => {
         <View style={styles.container}>
             {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
-                questions && currentQuestion.question_text &&
+                questions[0] && currentQuestion &&
                 <View style={styles.parent}>
                     <View style={styles.timer}>
                         <View style={styles.question_no_container}>
@@ -244,21 +252,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     timerBox: {
-        width: 30, // Adjust the width as needed
-        height: 30, // Adjust the height as needed
-        backgroundColor: '#F50057', // Color of the box
-        borderRadius: 5, // Adjust the border radius as needed
+        width: 30, 
+        height: 30, 
+        backgroundColor: '#F50057', 
+        borderRadius: 5, 
         justifyContent: 'center',
         alignItems: 'center',
     },
     timerText: {
         color: 'white',
-        fontSize: 16, // Adjust the font size as needed
+        fontSize: 16, 
         fontWeight: 'bold',
     },
     timerSeparator: {
-        fontSize: 16, // Adjust the font size as needed
-        marginHorizontal: 5, // Adjust the spacing as needed
+        fontSize: 16, 
+        marginHorizontal: 5,
     },
     question_no_container: {
         width: 50,

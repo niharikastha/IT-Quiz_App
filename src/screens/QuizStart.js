@@ -26,7 +26,7 @@ const QuizStart = ({ navigation, route }) => {
             }
             // console.log('AuthToken:', authToken);
 
-            await fetch(`http://172.25.1.231:4000/api/quiz/${itemId}`, {
+            await fetch(`http://192.168.29.122:4000/api/quiz/${itemId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ const QuizStart = ({ navigation, route }) => {
                 .then((res) => res.json())
                 .then(
                     (data) => {
-                        console.log(data);
+                        // console.log(data);
                         if (data.error) {
                             setErrormsg('Network error');
                         }
