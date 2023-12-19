@@ -4,12 +4,13 @@ import Title from '../Components/title';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuizStart = ({ navigation, route }) => {
-    const { itemId, courseName } = route.params;
+    const { courseId, courseName } = route.params;
+    // console.log(courseId);
     const [score, setScore] = useState(0);
     const [isLoading, setIsLoading] = useState(true)
-
+    const [quizId , setQuizId]= useState(0);
     const [quizData, setQuizData] = useState({
-        course_id: itemId,
+        course_id: courseId,
         response_at: new Date(),
         maxtime: 200,
         Score: score,
@@ -18,44 +19,44 @@ const QuizStart = ({ navigation, route }) => {
 
     async function startQuiz() {
         try {
-
             const authToken = await AsyncStorage.getItem('authToken');
             if (!authToken) {
                 navigation.navigate('login');
                 return;
             }
-            // console.log('AuthToken:', authToken);
-
-            await fetch(`http://192.168.29.122:4000/api/quiz/${itemId}`, {
+    
+            const response = await fetch(`http://192.168.29.122:4000/api/quiz/${courseId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${authToken}`,
                 },
-                body: JSON.stringify(quizData)
-            })
-                .then((res) => res.json())
-                .then(
-                    (data) => {
-                        // console.log(data);
-                        if (data.error) {
-                            setErrormsg('Network error');
-                        }
-                        else {
-                            // console.log(data.udata);
-                            navigation.navigate('quiz', { itemId: itemId, courseName: courseName });
-                        }
-                    }
-                )
-                .catch((error) => {
-                    console.error('Network request failed:', error.message);
-                });
-        }
-        catch (error) {
-            console.error("Error fetching questions:", error.message);
+                body: JSON.stringify(quizData),
+            });
+    
+            if (!response.ok) {
+                const errorMessage = await response.text(); 
+                throw new Error(`Failed to start quiz: ${errorMessage}`);
+            }
+    
+            const data = await response.json();
+            // console.log(data);
+
+            if (data.error) {
+                setErrormsg('Network error');
+            } else {
+                const quizId = data.data;
+                // console.log(quizId)
+                setScore(0); 
+                setQuizId(quizId); 
+    
+                navigation.navigate('quiz', { quizId, courseId, courseName });
+            }
+        } catch (error) {
+            console.error('Error starting quiz:', error.message);
         }
     }
-
+    
 
 
     return (

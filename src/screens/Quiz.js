@@ -5,8 +5,8 @@ import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Quiz = ({ navigation, route }) => {
-    const { itemId, courseName } = route.params;
-    // console.log(itemId)
+    const { quizId,courseId,courseName } = route.params;
+    // console.log(quizId);
     const [remainingTime, setRemainingTime] = useState(20); 
     const [currentQuestion, setCurrentQuestion] = useState("");
     const [questions, setQuestions] = useState([]);
@@ -25,7 +25,7 @@ const Quiz = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.29.122:4000/api/questions/${itemId}`, {
+            const response = await fetch(`http://192.168.29.122:4000/api/questions/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
@@ -47,14 +47,12 @@ const Quiz = ({ navigation, route }) => {
         fetchQuestions();
     }, []);
     
-    // Use useEffect to set currentQuestion when questions state changes
     useEffect(() => {
         if (questions.length > 0) {
             setCurrentQuestion(questions[0]);
         }
     }, [questions]);
     
-    // Rest of your component code remains unchanged
     
     useEffect(() => {
         const timer = setInterval(decrementTime, 1000);
@@ -81,7 +79,7 @@ const Quiz = ({ navigation, route }) => {
     async function responsetrack() {
         const authToken = await AsyncStorage.getItem('authToken');
         const response = {
-            quiz_id: itemId, 
+            quiz_id: quizId, 
             user_id: authToken,          
             question_id: currentQuestion._id,  
             response_at: new Date(),   
@@ -168,7 +166,7 @@ const Quiz = ({ navigation, route }) => {
 
     const handleShowResult = () => {
         navigation.navigate('result', {
-            score: score, correct : corr, incorrect : incorr, courseId : itemId 
+            score: score, correct : corr, incorrect : incorr, courseId : courseId, quizId: quizId 
         });
     }
 

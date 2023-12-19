@@ -66,7 +66,7 @@ const Category = ({ navigation }) => {
                     <View style={styles.courseContainer}>
                         {category.map((item) => (
                             <View style={styles.courseBlock} key={item._id}>
-                                <TouchableOpacity style={styles.courseNameContainer} onPress={() => navigation.navigate('courses', {itemId: item._id,categoryName: item.category_name})}>
+                                <TouchableOpacity style={styles.courseNameContainer} onPress={() => navigation.navigate('courses', {CategoryId: item._id,categoryName: item.category_name})}>
                                     <Text style={styles.courseName}>{item.category_name}</Text>
                                 </TouchableOpacity>
                             </View>

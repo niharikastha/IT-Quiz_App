@@ -8,10 +8,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // Import 
 
 
 const Courses = ({ navigation, route }) => {
-  const { itemId, categoryName } = route.params;
+  const { CategoryId, categoryName } = route.params;
   const [isLoading, setIsLoading] = useState(true);
   const [course, setCourse] = useState("");
-
+// console.log(CategoryId);
   async function fetchCourses() {
     try {
       const authToken = await AsyncStorage.getItem('authToken');
@@ -22,7 +22,7 @@ const Courses = ({ navigation, route }) => {
                 return;
             }
           
-      const response = await fetch(`http://192.168.29.122:4000/courses/${itemId}`,{
+      const response = await fetch(`http://192.168.29.122:4000/courses/${CategoryId}`,{
         headers:{
           Authorization: `Bearer ${authToken}`,
       }
@@ -31,7 +31,9 @@ const Courses = ({ navigation, route }) => {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
+      // console.log(data)
       setCourse(data.data);
+      // console.log(course[0]._id)
       setIsLoading(false);
 
     } catch (error) {
@@ -56,7 +58,7 @@ const Courses = ({ navigation, route }) => {
             <View style={styles.courseContainer}>
               {course.map((item) => (
                 <View style={styles.courseBlock} key={item._id}>
-                  <TouchableOpacity style={styles.courseNameContainer} onPress={() => navigation.navigate('quizStart', { itemId: item._id, courseName: item.course_name })}>
+                  <TouchableOpacity style={styles.courseNameContainer} onPress={() => navigation.navigate('quizStart', { courseId: item._id, courseName: item.course_name })}>
                     <Text style={styles.courseName}>{item.course_name}</Text>
                   </TouchableOpacity>
                 </View>

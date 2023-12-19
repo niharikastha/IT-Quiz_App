@@ -7,8 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Result = ({ navigation, route }) => {
-    const { score, correct, incorrect, courseId } = route.params
-    // console.log(courseId);
+    const { score, correct, incorrect, courseId, quizId } = route.params;
+    console.log(quizId+"----------------");
+    console.log(courseId+"+++++++++++++++");
     const [quizi, setQuizi] = useState([]);
     const [quizID, setQuizID] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -29,11 +30,8 @@ const Result = ({ navigation, route }) => {
                 throw new Error("Network response was not ok");
             }
             const data = await response.json();
-            // console.log(data );
             setQuizi(data.data);
-            // console.log(quizi);
             setQuizID(quizi[0]);
-            // console.log(quizID);
             setIsLoading(false);
         } 
         catch (error) 
@@ -89,7 +87,7 @@ const Result = ({ navigation, route }) => {
                         />
                     </View >
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('review', { courseID: quizID })}>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('review', { quizId: quizId })}>
                             <Text style={styles.buttonText}>Review Quiz</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('category')} style={styles.button}>
