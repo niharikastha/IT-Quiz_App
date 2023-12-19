@@ -8,8 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Result = ({ navigation, route }) => {
     const { score, correct, incorrect, courseId, quizId } = route.params;
-    console.log(quizId+"----------------");
-    console.log(courseId+"+++++++++++++++");
+    // console.log(quizId+"----------------");
+    // console.log(courseId+"+++++++++++++++");
     const [quizi, setQuizi] = useState([]);
     const [quizID, setQuizID] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

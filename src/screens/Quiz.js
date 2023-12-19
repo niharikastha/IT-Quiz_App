@@ -15,6 +15,7 @@ const Quiz = ({ navigation, route }) => {
     const [score, setScore] = useState(0);
     const [corr, setCorr] = useState(0);
     const [incorr, setIncorr] = useState(0);
+    const [responseSubmitted, setResponseSubmitted] = useState(false);
     let selectedAnswer = "";
     
 
@@ -77,35 +78,33 @@ const Quiz = ({ navigation, route }) => {
     
 
     async function responsetrack() {
-        const authToken = await AsyncStorage.getItem('authToken');
-        const response = {
-            quiz_id: quizId, 
-            user_id: authToken,          
-            question_id: currentQuestion._id,  
-            response_at: new Date(),   
-            chosen_answer: selectedAnswer,  
-            correct_answer: currentQuestion.correct_answer,
-        };
-        // console.log(response);
-            await fetch("http://192.168.29.122:4000/api/quiz-response/", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${authToken}`,
-            },
-            body: JSON.stringify(response),
-        })
-            .then((res) => res.json())
-            .then(
-                (data) => {
-                    // console.log(data);
-                }
-            )
-            .catch((error) => {
-                console.error('Network request failed:', error.message);
+        try {
+            const authToken = await AsyncStorage.getItem('authToken');
+            const response = {
+                quiz_id: quizId, 
+                user_id: authToken,          
+                question_id: currentQuestion._id,  
+                response_at: new Date(),   
+                chosen_answer: selectedAnswer,  
+                correct_answer: currentQuestion.correct_answer,
+            };
+    
+            const res = await fetch("http://192.168.29.122:4000/api/quiz-response/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${authToken}`,
+                },
+                body: JSON.stringify(response),
             });
+    
+            const data = await res.json();
+            console.log(data);
+        } catch (error) {
+            console.error('Network request failed:', error.message);
+        }
     }
-
+    
 
 
 
@@ -138,17 +137,20 @@ const Quiz = ({ navigation, route }) => {
         }
     }
     const handleNextPress = () => {
-        responsetrack();
+        if (!responseSubmitted) {
+            responsetrack();
+            setResponseSubmitted(true); 
+        }
         resetTimer();
-        if ((ques) === 4) {
-            // setQues(ques + 1);
+        if (ques === 4) {
             handleShowResult();
-        } else {
+        } else if (ques < 4) {
             setCurrentQuestion(questions[ques + 1]);
             setQues(ques + 1);
-
+            setResponseSubmitted(false); 
         }
-    }
+    };
+    
 
     const handleSkipPress = () => {
         resetTimer();
