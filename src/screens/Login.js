@@ -29,7 +29,7 @@ const Login = ({ navigation }) => {
             })
                 .then(res => res.json()).then(
                     data => {
-                        // console.log(data);
+                        console.log(data);
                         // console.log(data.token)
 
                         if (data.error) {

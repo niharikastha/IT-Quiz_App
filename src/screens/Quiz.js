@@ -5,9 +5,9 @@ import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Quiz = ({ navigation, route }) => {
-    const { quizId,courseId,courseName } = route.params;
+    const { quizId, courseId, courseName } = route.params;
     // console.log(quizId);
-    const [remainingTime, setRemainingTime] = useState(20); 
+    const [remainingTime, setRemainingTime] = useState(20);
     const [currentQuestion, setCurrentQuestion] = useState("");
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
@@ -17,7 +17,7 @@ const Quiz = ({ navigation, route }) => {
     const [incorr, setIncorr] = useState(0);
     const [responseSubmitted, setResponseSubmitted] = useState(false);
     let selectedAnswer = "";
-    
+
 
     async function fetchQuestions() {
         try {
@@ -43,18 +43,18 @@ const Quiz = ({ navigation, route }) => {
             setIsLoading(false);
         }
     }
-    
+
     useEffect(() => {
         fetchQuestions();
     }, []);
-    
+
     useEffect(() => {
         if (questions.length > 0) {
             setCurrentQuestion(questions[0]);
         }
     }, [questions]);
-    
-    
+
+
     useEffect(() => {
         const timer = setInterval(decrementTime, 1000);
         return () => {
@@ -75,20 +75,20 @@ const Quiz = ({ navigation, route }) => {
     }
 
 
-    
+
 
     async function responsetrack() {
         try {
             const authToken = await AsyncStorage.getItem('authToken');
             const response = {
-                quiz_id: quizId, 
-                user_id: authToken,          
-                question_id: currentQuestion._id,  
-                response_at: new Date(),   
-                chosen_answer: selectedAnswer,  
+                quiz_id: quizId,
+                user_id: authToken,
+                question_id: currentQuestion._id,
+                response_at: new Date(),
+                chosen_answer: selectedAnswer,
                 correct_answer: currentQuestion.correct_answer,
             };
-    
+
             const res = await fetch("http://192.168.29.122:4000/api/quiz-response/", {
                 method: 'POST',
                 headers: {
@@ -97,20 +97,20 @@ const Quiz = ({ navigation, route }) => {
                 },
                 body: JSON.stringify(response),
             });
-    
+
             const data = await res.json();
             console.log(data);
         } catch (error) {
             console.error('Network request failed:', error.message);
         }
     }
-    
+
 
 
 
     const handleSelectedOption = (_option) => {
-       
-       selectedAnswer = _option;
+
+        selectedAnswer = _option;
         if (ques !== 4) {
             setQues(ques + 1)
             if (_option == currentQuestion.correct_answer) {
@@ -120,14 +120,14 @@ const Quiz = ({ navigation, route }) => {
             }
             else {
                 setScore(score - 1)
-                setIncorr(incorr + 1 )
+                setIncorr(incorr + 1)
                 handleNextPress()
             }
         }
         if (ques === 4) {
             if (_option == currentQuestion.correct_answer) {
                 setScore(score + 4)
-                setCorr (corr + 1)
+                setCorr(corr + 1)
             }
             else {
                 setScore(score - 1)
@@ -139,7 +139,7 @@ const Quiz = ({ navigation, route }) => {
     const handleNextPress = () => {
         if (!responseSubmitted) {
             responsetrack();
-            setResponseSubmitted(true); 
+            setResponseSubmitted(true);
         }
         resetTimer();
         if (ques === 4) {
@@ -147,10 +147,10 @@ const Quiz = ({ navigation, route }) => {
         } else if (ques < 4) {
             setCurrentQuestion(questions[ques + 1]);
             setQues(ques + 1);
-            setResponseSubmitted(false); 
+            setResponseSubmitted(false);
         }
     };
-    
+
 
     const handleSkipPress = () => {
         resetTimer();
@@ -168,14 +168,17 @@ const Quiz = ({ navigation, route }) => {
 
     const handleShowResult = () => {
         navigation.navigate('result', {
-            score: score, correct : corr, incorrect : incorr, courseId : courseId, quizId: quizId 
+            score: score, correct: corr, incorrect: incorr, courseId: courseId, quizId: quizId
         });
     }
 
     return (
         <View style={styles.container}>
-            {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
+            {isLoading ? (
+                <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text>
+                </View>
+            ) : (
                 questions[0] && currentQuestion &&
                 <View style={styles.parent}>
                     <View style={styles.timer}>
@@ -252,20 +255,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     timerBox: {
-        width: 30, 
-        height: 30, 
-        backgroundColor: '#F50057', 
-        borderRadius: 5, 
+        width: 30,
+        height: 30,
+        backgroundColor: '#F50057',
+        borderRadius: 5,
         justifyContent: 'center',
         alignItems: 'center',
     },
     timerText: {
         color: 'white',
-        fontSize: 16, 
+        fontSize: 16,
         fontWeight: 'bold',
     },
     timerSeparator: {
-        fontSize: 16, 
+        fontSize: 16,
         marginHorizontal: 5,
     },
     question_no_container: {

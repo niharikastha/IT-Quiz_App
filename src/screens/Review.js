@@ -4,9 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Review = ({ navigation, route }) => {
     const { quizId } = route.params;
-    const [responseData, setResponseData] = useState([]);
-    const [responseObject, setResponseObject] = useState([]);
-    const [responseEachQuestion, setResponseEachQuestion] = useState([]);
+    const [ques, setQues] = useState(0);
+    const [quizRes, setQuizRes] = useState([]);
+    const [userQues, setUserQues] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const mounted = useRef(true);
 
@@ -17,21 +17,27 @@ const Review = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
+
             const response = await fetch(`http://192.168.29.122:4000/api/reviewQuiz/${quizId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
             });
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+
             const data = await response.json();
-            if (mounted.current) {
-                setResponseData(data.data);
-                setResponseObject(data.data.quizRes);
-                // setResponseEachQuestion(data.data.quizRes[0]);
+            // console.log(data.data);
+            if (data && data.data && data.data.quizRes && data.data.userQues) {
+                setQuizRes(data.data.quizRes);
+                setUserQues(data.data.userQues);
                 setIsLoading(false);
+            } else {
+                throw new Error('Invalid response structure');
             }
+
         } catch (error) {
             console.error('Error fetching questions:', error);
         }
@@ -40,42 +46,81 @@ const Review = ({ navigation, route }) => {
     useEffect(() => {
         mounted.current = true;
         fetchQuestions();
+
         return () => {
             mounted.current = false;
         };
     }, []);
 
-    useEffect(() => {
-        console.log(responseObject);
-        if (responseObject.length > 0) {
-             setResponseEachQuestion(responseObject[0]);
+    const handleNextPress = () => {
+        if (ques < userQues.length - 1) {
+            setQues(ques + 1);
         }
-    }, [responseObject]);
+    };
+
+    const handlePrevPress = () => {
+        if (ques > 0) {
+            setQues(ques - 1);
+        }
+    }
 
     return (
         <View style={styles.container}>
             {isLoading ? (
-                <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>LOADING...</Text>
+                <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text>
                 </View>
             ) : (
-                responseObject && responseEachQuestion && (
+                quizRes[0] && userQues[0] && (
                     <View style={styles.parent}>
-                        <View style={styles.timer}>
-                            {/* Timer UI goes here */}
+                        <View style={styles.question_no_container}>
+                            <Text style={styles.question_no}>{ques + 1}</Text>
                         </View>
-                        {/* <View style={styles.questionContainer}>
-                            <Text style={styles.questionText}>{responseEachQuestion.question_text}</Text>
-                        </View> */}
-                        {/* <View style={styles.options}>
-                            {responseEachQuestion.options.map((option, index) => (
-                                <TouchableOpacity key={index} style={styles.optionButton}>
-                                    <Text style={styles.optionText}>{option}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View> */}
+                        <View style={styles.questionContainer}>
+                            {userQues.map((question, index) => {
+                                const userAnswer = quizRes[index].chosen_answer;
+                                const correctAnswer = question.correct_answer;
+                                const isCorrect = userAnswer === correctAnswer;
+
+                                return (
+                                    <View key={index} style={styles.questionItem}>
+                                        <View style={styles.top}>
+                                            <Text style={styles.question}>{question.question_text}</Text>
+                                        </View>
+                                        {/* Display options */}
+                                        {question.options.map((option, optionIndex) => (
+                                            <TouchableOpacity
+                                                key={optionIndex}
+                                                style={[
+                                                    styles.optionButton,
+                                                    {
+                                                        backgroundColor: userAnswer === option
+                                                            ? isCorrect
+                                                                ? 'green' // Chosen and correct option
+                                                                : 'red' // Chosen but incorrect option
+                                                            : correctAnswer === option
+                                                                ? 'green' // Correct option
+                                                                : '#FFB0CC', // Default background color
+                                                    },
+                                                ]}
+                                                disabled
+                                            >
+                                                <Text style={styles.option}>{option}</Text>
+                                            </TouchableOpacity>
+
+
+                                        ))}
+                                    </View>
+                                );
+                            })}
+                        </View>
                         <View style={styles.bottom}>
-                            {/* Navigation buttons go here */}
+                            <TouchableOpacity style={styles.button} onPress={handlePrevPress}>
+                                <Text style={styles.buttonText}>PREV</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={handleNextPress}>
+                                <Text style={styles.buttonText}>NEXT</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 )
@@ -90,52 +135,65 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         height: '100%',
     },
-    parent: {
-        height: '100%',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    loadingText: {
-        fontSize: 30,
-        fontWeight: '800',
-        color: 'black',
-    },
-    timer: {
-        // Timer styles
-    },
-    questionContainer: {
+    top: {
         marginVertical: 16,
     },
-    questionText: {
-        fontSize: 28,
-        color: 'black',
+    question_no_container: {
+        width: 50,
+        height: 50,
+        backgroundColor: "#F50057",
+        borderRadius: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 150,
+    },
+    question_no: {
+        alignContent: "center",
+        fontWeight: "900",
+        fontSize: 20,
     },
     options: {
         marginVertical: 16,
         flex: 1,
     },
-    optionButton: {
-        paddingVertical: 12,
-        marginVertical: 6,
-        backgroundColor: '#FFB0CC',
-        paddingHorizontal: 12,
-        borderRadius: 12,
+    bottom: {
+        marginBottom: 12,
+        paddingVertical: 16,
+        justifyContent: "space-between",
+        flexDirection: 'row',
     },
-    optionText: {
+    button: {
+        backgroundColor: "#F50057",
+        padding: 12,
+        paddingHorizontal: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginBottom: 30,
+    },
+    buttonText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: 'white',
+    },
+    question: {
+        fontSize: 28,
+        color: "black",
+
+    },
+    option: {
         fontSize: 18,
         fontWeight: '500',
         color: 'black',
     },
-    bottom: {
-        marginBottom: 12,
-        paddingVertical: 16,
-        justifyContent: 'space-between',
-        flexDirection: 'row',
+    optionButton: {
+        paddingVertical: 12,
+        marginVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 12,
     },
-    // Add styles for navigation buttons if needed
+    parent: {
+        height: '100%',
+    }
 });
 
 export default Review;
