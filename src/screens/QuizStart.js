@@ -25,7 +25,7 @@ const QuizStart = ({ navigation, route }) => {
                 return;
             }
     
-            const response = await fetch(`http://192.168.29.122:4000/api/quiz/${courseId}`, {
+            const response = await fetch(`http://192.168.159.120:4000/api/quiz/${courseId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

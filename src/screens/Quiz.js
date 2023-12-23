@@ -26,7 +26,7 @@ const Quiz = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.29.122:4000/api/questions/${courseId}`, {
+            const response = await fetch(`http://192.168.159.120:4000/api/questions/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
@@ -89,7 +89,7 @@ const Quiz = ({ navigation, route }) => {
                 correct_answer: currentQuestion.correct_answer,
             };
 
-            const res = await fetch("http://192.168.29.122:4000/api/quiz-response/", {
+            const res = await fetch("http://192.168.159.120:4000/api/quiz-response/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,6 +143,7 @@ const Quiz = ({ navigation, route }) => {
         }
         resetTimer();
         if (ques === 4) {
+            setResponseSubmitted(false);
             handleShowResult();
         } else if (ques < 4) {
             setCurrentQuestion(questions[ques + 1]);
@@ -167,7 +168,11 @@ const Quiz = ({ navigation, route }) => {
     }
 
     const handleShowResult = () => {
-        navigation.navigate('result', {
+        if (!responseSubmitted) {
+            responsetrack();
+            setResponseSubmitted(true);
+        }
+         navigation.navigate('result', {
             score: score, correct: corr, incorrect: incorr, courseId: courseId, quizId: quizId
         });
     }

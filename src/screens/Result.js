@@ -21,7 +21,7 @@ const Result = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.29.122:4000/api/result`, {
+            const response = await fetch(`http://192.168.159.120:4000/api/result`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 }
@@ -87,7 +87,7 @@ const Result = ({ navigation, route }) => {
                         />
                     </View >
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('review', { quizId: quizId })}>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('review', { quizId: quizId, courseId: courseId })}>
                             <Text style={styles.buttonText}>Review Quiz</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('category')} style={styles.button}>

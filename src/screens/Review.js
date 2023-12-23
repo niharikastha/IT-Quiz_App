@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Review = ({ navigation, route }) => {
-    const { quizId } = route.params;
+    const { quizId, courseId } = route.params;
     const [ques, setQues] = useState(0);
     const [quizRes, setQuizRes] = useState([]);
     const [userQues, setUserQues] = useState([]);
@@ -18,7 +18,7 @@ const Review = ({ navigation, route }) => {
                 return;
             }
 
-            const response = await fetch(`http://192.168.29.122:4000/api/reviewQuiz/${quizId}`, {
+            const response = await fetch(`http://192.168.159.120:4000/api/reviewQuiz/${quizId}/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
@@ -52,80 +52,72 @@ const Review = ({ navigation, route }) => {
         };
     }, []);
 
-    const handleNextPress = () => {
-        if (ques < userQues.length - 1) {
-            setQues(ques + 1);
-        }
+    const handleMenuPress = () => {
+        navigation.navigate('category');
     };
 
-    const handlePrevPress = () => {
-        if (ques > 0) {
-            setQues(ques - 1);
-        }
-    }
 
     return (
-        <View style={styles.container}>
-            {isLoading ? (
-                <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                    <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text>
-                </View>
-            ) : (
-                quizRes[0] && userQues[0] && (
-                    <View style={styles.parent}>
-                        <View style={styles.question_no_container}>
-                            <Text style={styles.question_no}>{ques + 1}</Text>
-                        </View>
-                        <View style={styles.questionContainer}>
-                            {userQues.map((question, index) => {
-                                const userAnswer = quizRes[index].chosen_answer;
-                                const correctAnswer = question.correct_answer;
-                                const isCorrect = userAnswer === correctAnswer;
+        <ScrollView style={styles.scrollView}>
 
-                                return (
-                                    <View key={index} style={styles.questionItem}>
-                                        <View style={styles.top}>
-                                            <Text style={styles.question}>{question.question_text}</Text>
-                                        </View>
-                                        {/* Display options */}
-                                        {question.options.map((option, optionIndex) => (
-                                            <TouchableOpacity
-                                                key={optionIndex}
-                                                style={[
-                                                    styles.optionButton,
-                                                    {
-                                                        backgroundColor: userAnswer === option
-                                                            ? isCorrect
-                                                                ? 'green' // Chosen and correct option
-                                                                : 'red' // Chosen but incorrect option
-                                                            : correctAnswer === option
-                                                                ? 'green' // Correct option
-                                                                : '#FFB0CC', // Default background color
-                                                    },
-                                                ]}
-                                                disabled
-                                            >
-                                                <Text style={styles.option}>{option}</Text>
-                                            </TouchableOpacity>
-
-
-                                        ))}
-                                    </View>
-                                );
-                            })}
-                        </View>
-                        <View style={styles.bottom}>
-                            <TouchableOpacity style={styles.button} onPress={handlePrevPress}>
-                                <Text style={styles.buttonText}>PREV</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.button} onPress={handleNextPress}>
-                                <Text style={styles.buttonText}>NEXT</Text>
-                            </TouchableOpacity>
-                        </View>
+            <View style={styles.container}>
+                {isLoading ? (
+                    <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                        <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text>
                     </View>
-                )
-            )}
-        </View>
+                ) : (
+                    quizRes[0] && userQues[0] && (
+                        <View style={styles.parent}>
+                            <View style={styles.questionContainer}>
+                        // Inside the map function for questions
+                                {userQues.map((question, index) => {
+                                    const userAnswer = quizRes[index].chosen_answer;
+                                    const correctAnswer = question.correct_answer;
+                                    const isCorrect = userAnswer === correctAnswer;
+                                    const isSkipped = question.skipped_question;
+
+                                    return (
+                                        <View key={index} style={styles.questionItem}>
+                                            <View style={styles.top}>
+                                                <Text style={styles.question}>{question.question_text}</Text>
+                                            </View>
+                                            {question.options.map((option, optionIndex) => (
+                                                <TouchableOpacity
+                                                    key={optionIndex}
+                                                    style={[
+                                                        styles.optionButton,
+                                                        {
+                                                            backgroundColor: isSkipped && correctAnswer === option
+                                                                ? 'purple' // Highlight correct answer in purple for skipped questions
+                                                                : userAnswer === option
+                                                                    ? isCorrect
+                                                                        ? 'green' // Chosen and correct option
+                                                                        : 'red' // Chosen but incorrect option
+                                                                    : correctAnswer === option
+                                                                        ? 'green' // Correct option
+                                                                        : '#FFB0CC', // Default background color
+                                                        },
+                                                    ]}
+                                                    disabled
+                                                >
+                                                    <Text style={styles.option}>{option}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    );
+                                })}
+
+                            </View>
+                            <View style={styles.bottom}>
+                                <TouchableOpacity style={styles.button} onPress={handleMenuPress}>
+                                    <Text style={styles.buttonText}>MENU</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )
+                )}
+            </View>
+        </ScrollView>
     );
 };
 
@@ -159,8 +151,7 @@ const styles = StyleSheet.create({
     bottom: {
         marginBottom: 12,
         paddingVertical: 16,
-        justifyContent: "space-between",
-        flexDirection: 'row',
+        // alignContent:'center'
     },
     button: {
         backgroundColor: "#F50057",
@@ -169,6 +160,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         marginBottom: 30,
+        alignContent: 'center'
     },
     buttonText: {
         fontSize: 18,
@@ -193,6 +185,11 @@ const styles = StyleSheet.create({
     },
     parent: {
         height: '100%',
+    },
+    questionItem: {
+        marginBottom: 25,
+
+
     }
 });
 
