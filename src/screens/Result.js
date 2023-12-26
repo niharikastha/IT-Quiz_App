@@ -8,10 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Result = ({ navigation, route }) => {
     const { score, correct, incorrect, courseId, quizId } = route.params;
-    // console.log(quizId+"----------------");
-    // console.log(courseId+"+++++++++++++++");
-    const [quizi, setQuizi] = useState([]);
-    const [quizID, setQuizID] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const resultBanner = score > 10 ? "https://cdni.iconscout.com/illustration/premium/thumb/men-celebrating-victory-4587301-3856211.png" : "https://cdni.iconscout.com/illustration/free/thumb/concept-about-business-failure-1862195-1580189.png"
     async function fetchResults() {
@@ -21,22 +17,23 @@ const Result = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.159.120:4000/api/result`, {
+            const res = await fetch(`http://192.168.80.120:4000/api/result/${courseId}/${quizId}/${score}`, {
+                method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${authToken}`,
                 }
             });
-            if (!response.ok) {
+            if (!res.ok) {
                 throw new Error("Network response was not ok");
             }
-            const data = await response.json();
-            setQuizi(data.data);
-            setQuizID(quizi[0]);
+            const data = await res.json();
+            // console.log(data);
             setIsLoading(false);
         } 
         catch (error) 
         {
-            console.error("Error fetching questions:", error);
+            console.error("Error fetching result:", error);
         }
     }
     useEffect(() => {
@@ -47,7 +44,6 @@ const Result = ({ navigation, route }) => {
         <View>
             {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
-                    quizi && quizi[0]._id &&
                 <View style={styles.container}>
 
                     <Title titleText='Result' />

@@ -34,7 +34,7 @@ const Verification = ({ navigation, route }) => {
                 dob: userdata[0]?.dob,
             }
 
-            fetch('http://192.168.159.120:4000/signup', {
+            fetch('http://192.168.80.120:4000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

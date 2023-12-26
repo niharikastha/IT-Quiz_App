@@ -13,6 +13,7 @@ import Review from './src/screens/Review'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import 'react-native-gesture-handler';
+import Leaderboard from './src/screens/Leaderboard'
 
 const Stack = createNativeStackNavigator();
 
@@ -66,6 +67,11 @@ const App = () => {
         } 
         />
          <Stack.Screen name="review" component={Review} 
+         options={
+          {headerShown : false}
+        } 
+        />
+         <Stack.Screen name="leaderboard" component={Leaderboard} 
          options={
           {headerShown : false}
         } 

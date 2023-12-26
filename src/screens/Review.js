@@ -18,7 +18,7 @@ const Review = ({ navigation, route }) => {
                 return;
             }
 
-            const response = await fetch(`http://192.168.159.120:4000/api/reviewQuiz/${quizId}/${courseId}`, {
+            const response = await fetch(`http://192.168.80.120:4000/api/reviewQuiz/${quizId}/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
@@ -69,9 +69,8 @@ const Review = ({ navigation, route }) => {
                     quizRes[0] && userQues[0] && (
                         <View style={styles.parent}>
                             <View style={styles.questionContainer}>
-                        // Inside the map function for questions
                                 {userQues.map((question, index) => {
-                                    const userAnswer = quizRes[index].chosen_answer;
+                                    const userAnswer = quizRes[index] ? quizRes[index].chosen_answer : null;
                                     const correctAnswer = question.correct_answer;
                                     const isCorrect = userAnswer === correctAnswer;
                                     const isSkipped = question.skipped_question;
@@ -88,7 +87,7 @@ const Review = ({ navigation, route }) => {
                                                         styles.optionButton,
                                                         {
                                                             backgroundColor: isSkipped && correctAnswer === option
-                                                                ? 'purple' // Highlight correct answer in purple for skipped questions
+                                                                ? 'black'
                                                                 : userAnswer === option
                                                                     ? isCorrect
                                                                         ? 'green' // Chosen and correct option
@@ -151,7 +150,7 @@ const styles = StyleSheet.create({
     bottom: {
         marginBottom: 12,
         paddingVertical: 16,
-        // alignContent:'center'
+        alignContent:'center'
     },
     button: {
         backgroundColor: "#F50057",
@@ -160,7 +159,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         marginBottom: 30,
-        alignContent: 'center'
+        // alignContent: 'center'
     },
     buttonText: {
         fontSize: 18,

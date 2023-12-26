@@ -26,7 +26,7 @@ const Quiz = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.159.120:4000/api/questions/${courseId}`, {
+            const response = await fetch(`http://192.168.80.120:4000/api/questions/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },
@@ -89,7 +89,7 @@ const Quiz = ({ navigation, route }) => {
                 correct_answer: currentQuestion.correct_answer,
             };
 
-            const res = await fetch("http://192.168.159.120:4000/api/quiz-response/", {
+            const res = await fetch("http://192.168.80.120:4000/api/quiz-response/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

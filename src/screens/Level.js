@@ -14,7 +14,7 @@ const Courses = ({ navigation, route }) => {
 
   async function fetchCourses() {
     try {
-      const response = await fetch(`http://192.168.159.120:4000/level/${itemId}`);
+      const response = await fetch(`http://192.168.80.120:4000/level/${itemId}`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
