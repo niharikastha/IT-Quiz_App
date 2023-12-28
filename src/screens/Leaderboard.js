@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import profilePic from '../../assets/profileDefault.jpg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const Leaderboard = ({ navigation, route }) => {
     const { courseId, quizId } = route.params;
-    const { userData, setUserData } = ([]);
-    const { userName, setUserName } = ([]);
-    const { userScore, setUserScore } = ([]);
-    const { isLoading, setIsLoading } = (true);
+    const [userData, setUserData] = useState([]);
+    const [topTen, setTopTen] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-
-    const [leaderboardData, setLeaderboardData] = useState([]);
     const fetchLeaderboardData = async () => {
         try {
             const authToken = await AsyncStorage.getItem('authToken');
@@ -19,41 +16,38 @@ const Leaderboard = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.80.120:4000/api/leader-board/${courseId}`, {
+            const response = await fetch(`http://192.168.38.120:4000/api/leader-board/${courseId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${authToken}`,
-                }
+                },
             });
 
             if (!response.ok) {
-                throw new Error('Error fetching leaderboard data');
+                throw new Error('Network response was not ok');
             }
 
             const data = await response.json();
-            console.log(data.data);
-            // setUserData(data.data);
-            console.log(userData)
-           
+            console.log(data);
+
+            if (data.data && data.data.topTen) {
+                setTopTen(data.data.topTen);
+                console.log(topTen+"+++++++++++++++=")
+            }
+
+            setIsLoading(false);
         } catch (error) {
             console.error('Error fetching leaderboard data:', error);
+            setIsLoading(false);
+            // Handle errors, show an error message, etc.
         }
     };
+
     useEffect(() => {
         fetchLeaderboardData();
-    }, []);
-
-    useEffect(()=>{
-        if(userData.length > 0){
-            setUserName(userData.name);
-            console.log(userName)
-            setUserScore(userData.score);
-            console.log(userScore)
-            setIsLoading(false);
-        }
-    },[userData]);
-
+    }, [courseId]); 
+   
     return (
         <View style={styles.container}>
             {isLoading ? (
@@ -61,57 +55,118 @@ const Leaderboard = ({ navigation, route }) => {
                     <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }}>LOADING...</Text>
                 </View>
             ) : (
-                userName && userScore &&
-                <View>
+                userData.length > 0 && topTen[0] && (
                     <View>
-                        {userName.map((user, index) => (
-                            <View key={index} style={styles.leaderboardItem}>
-                                <Text style={styles.userName}>{`${index + 1}. ${user.name}`}</Text>
+                        <Text style={styles.header}>LEADERBOARD</Text>
+                        <Text style={styles.subheader}>-------- Top 10 Winners --------</Text>
+
+                        <View style={styles.background}>
+                            <View style={styles.topThreeContainer}>
+                                {topTen.slice(0, 3).map((user, index) => (
+                                    <View key={index} style={styles.topThreeItem}>
+                                        <Text style={styles.position}>{index + 1}</Text>
+                                        <Image source={profilePic} style={styles.profilePic} />
+                                        <Text style={styles.userName}>{`${user.name} ${user.score} (${user.rating})`}</Text>
+                                    </View>
+                                ))}
                             </View>
-                        ))}
-                    </View>
-                    <View>
-                        {userScore.map((user, index) => (
-                            <View key={index} style={styles.leaderboardItem}>
-                                <Text style={styles.userName}>{`${index + 1}. ${user.score}`}</Text>
+
+                            <View style={styles.restContainer}>
+                                {topTen.slice(3).map((user, index) => (
+                                    <View key={index} style={styles.leaderboardItem}>
+                                        <Text style={styles.userName}>{`${index + 4}. ${user.name}  ${user.score}  (${user.rating})`}</Text>
+                                    </View>
+                                ))}
                             </View>
-                        ))}
+                        </View>
                     </View>
-                </View>
+                )
             )}
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f4f4f4',
+        backgroundColor: '#F50057',
+        margin: 18,
+        borderRadius: 25,
+    },
+    background: {
+        padding: 10,
+        borderRadius: 15,
     },
     header: {
-        backgroundColor: '#3498db',
-        color: '#fff',
-        padding: 10,
+        color: '#ffe3ed',
+        padding: 0,
         textAlign: 'center',
-        fontSize: 20,
+        fontSize: 30,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    subheader: {
+        alignContent: 'center',
+        textAlign: 'center',
+        fontSize: 18,
+        color: 'black',
+        padding: 5,
+
+    },
+
+    topThreeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: '#ffe3ed',
+        borderRadius: 15,
+        padding: 10,
+    },
+    topThreeItem: {
+        alignItems: 'center',
+        flexDirection: 'column',
+        flex: 1,
+    },
+    profilePic: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 10,
+    },
+
+    restContainer: {
+        marginTop: 10,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignContent: 'center',
+        textAlign: 'center',
+        justifyContent: 'space-between'
     },
     leaderboardItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-        width: '100%',
+        flexBasis: '100%', // Two users per row, adjust as needed
+        padding: 18,
+        borderBottomWidth: 2,
+        // borderBottomColor: '#e0e0e0',
+        backgroundColor: '#ffe3ed',
+        borderRadius: 15,
+        margin: 6,
+
     },
     userName: {
         fontWeight: 'bold',
+        color: 'black',
+
     },
     userScore: {
         color: '#3498db',
     },
-});
 
+    position: {
+        marginRight: 10,
+        fontWeight: 'bold',
+        fontSize: 18,
+    },
+});
 export default Leaderboard;

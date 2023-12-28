@@ -22,6 +22,12 @@ label:{
     color:'#F50057',
     marginLeft:10,
 },
+label2:{
+    fontSize:14,
+    color:'#F50057',
+    marginLeft:10,
+    textAlign:'right'
+},
 input:{
     backgroundColor:"#FFB0CC",
     borderRadius: 20,

@@ -17,7 +17,7 @@ const Result = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const res = await fetch(`http://192.168.80.120:4000/api/result/${courseId}/${quizId}/${score}`, {
+            const res = await fetch(`http://192.168.38.120:4000/api/result/${courseId}/${quizId}/${score}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const Result = ({ navigation, route }) => {
                         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('review', { quizId: quizId, courseId: courseId })}>
                             <Text style={styles.buttonText}>Review Quiz</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate('category')} style={styles.button}>
+                        <TouchableOpacity onPress={() => navigation.navigate('leaderboard',{courseId:courseId, quizId:quizId})} style={styles.button}>
                             <Text style={styles.buttonText}>Leaderboard</Text>
                         </TouchableOpacity>
                     </View>

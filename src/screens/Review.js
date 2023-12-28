@@ -18,7 +18,7 @@ const Review = ({ navigation, route }) => {
                 return;
             }
 
-            const response = await fetch(`http://192.168.80.120:4000/api/reviewQuiz/${quizId}/${courseId}`, {
+            const response = await fetch(`http://192.168.38.120:4000/api/reviewQuiz/${quizId}/${courseId}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
                 },

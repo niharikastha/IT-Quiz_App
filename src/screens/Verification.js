@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity } from 'reac
 import React, { useState, useEffect } from 'react'
 import pattern from '../../assets/pattern.png';
 import logo from '../../assets/mainlogo.png';
-import { head1, head2, formGroup, label, input, link, link2, errormessage, bwmessage } from '../common/formcss';
+import { head1, head2, formGroup, label2, input, link, link2, errormessage, bwmessage } from '../common/formcss';
 import { button1 } from '../common/button';
 import { act } from 'react-test-renderer';
 const Verification = ({ navigation, route }) => {
@@ -34,7 +34,7 @@ const Verification = ({ navigation, route }) => {
                 dob: userdata[0]?.dob,
             }
 
-            fetch('http://192.168.80.120:4000/signup', {
+            fetch('http://192.168.38.120:4000/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -44,6 +44,7 @@ const Verification = ({ navigation, route }) => {
                 .then(res => res.json())
                 .then(data => {
                     // setIsLoading(false);
+                    console.log(data);
                     if (data.message === 'User registered successfully') {
                         alert(data.message);
                         navigation.navigate('login')
@@ -84,13 +85,14 @@ const Verification = ({ navigation, route }) => {
                             }
 
                             <View style={formGroup}>
-                                <Text style={styles.label}>Code</Text>
+                                <Text style={styles.label}>Enter Code</Text>
                                 <Text></Text>
                                 <TextInput style={input}
                                     placeholder="Enter 6 digit verification code"
                                     onPressIn={() => setErrormsg(null)}
                                     secureTextEntry={true}
                                     onChangeText={(text) => setUserCode(text)} />
+                                <Text style={label2}>Resend Otp</Text>
                             </View>
 
                             <TouchableOpacity style={styles.buttonMargin}
@@ -144,6 +146,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#F50057',
         fontWeight: 'bold',
+        textAlign:'center'
     },
     small1: {
         color: '#fff',

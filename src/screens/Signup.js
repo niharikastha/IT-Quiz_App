@@ -10,7 +10,7 @@ const Signup = ({ navigation }) => {
         name: '',
         email: '',
         password: '',
-        cpassword: '',
+        confirmPassword: '',
         dob: '',
 
     })
@@ -22,7 +22,7 @@ const Signup = ({ navigation }) => {
             fdata.name == '' ||
             fdata.email == '' ||
             fdata.password == '' ||
-            fdata.cpassword == '' ||
+            fdata.confirmPassword == '' ||
             fdata.dob == ''
         ) {
             setErrormsg('All fields are required');
@@ -39,12 +39,12 @@ const Signup = ({ navigation }) => {
                 'Password must be at least 8 characters long with a number, a special character, and a capital letter'
             );
             return;
-        } else if (fdata.password != fdata.cpassword) {
+        } else if (fdata.password != fdata.confirmPassword) {
             setErrormsg("Passwords do not match");
             return;
         }
         else {
-            fetch('http://192.168.80.120:4000/verify', {
+            fetch('http://192.168.38.120:4000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -59,11 +59,11 @@ const Signup = ({ navigation }) => {
                             alert('Invalid Credentials')
                             setErrormsg('Invalid credentials');
                         }
-                        else if (data.message === "Verification code sent to your Email") {
+                        else if (data.msg === "User registered successfully. Verification code sent") {
                             // alert('account created successfully');
                             // console.log(data.udata);
-                            alert(data.message);
-                            navigation.navigate('verification', { userdata: data.udata });
+                            alert(data.msg);
+                            navigation.navigate('verification', { userdata: data.data });
                         }
                     }
                 )
@@ -137,7 +137,7 @@ const Signup = ({ navigation }) => {
                         <Text style={label}>Confirm Password</Text>
                         <TextInput style={input} placeholder='Confirm your password'
                             onPressIn={() => setErrormsg(null)}
-                            onChangeText={(text) => setFdata({ ...fdata, cpassword: text })}
+                            onChangeText={(text) => setFdata({ ...fdata, confirmPassword: text })}
                         />
                     </View>
 
