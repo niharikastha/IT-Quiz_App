@@ -7,111 +7,105 @@ import { button1 } from '../common/button';
 import { act } from 'react-test-renderer';
 const Verification = ({ navigation, route }) => {
     const { userdata } = route.params;
-
     const [errormsg, setErrormsg] = useState(null);
     const [userCode, setUserCode] = useState('XXXX');
-    const [actualCode, setActualCode] = useState(null);
-    // const [isLoading, setIsLoading] = useState(true)
 
-    useEffect(() => {
-        setActualCode(userdata[0]?.verificationCode)
-    }, [])
+    async function Sendtobackend() {
+        try {
 
-    const Sendtobackend = () => {
-        // console.log(userCode);
-        // console.log(actualCode);
-
-        if (userCode == 'XXXX' || userCode == '') {
-            setErrormsg('Please enter the code');
-            return;
-        }
-        else if (userCode == actualCode) {
-            // console.log('correct code');
-            const fdata = {
-                email: userdata[0]?.email,
-                password: userdata[0]?.password,
-                name: userdata[0]?.name,
-                dob: userdata[0]?.dob,
+            if (userCode == 'XXXX' || userCode == '') {
+                setErrormsg('Please enter the code');
+                return;
             }
+            else {
+                const fdata = {
+                    email: userdata.email,
+                    otpCode: userCode
+                }
 
-            fetch('http://192.168.38.120:4000/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(fdata)
-            })
-                .then(res => res.json())
-                .then(data => {
-                    // setIsLoading(false);
-                    console.log(data);
-                    if (data.message === 'User registered successfully') {
-                        alert(data.message);
-                        navigation.navigate('login')
-                    }
-                    else {
-                        alert("Something went wrong !! Try Signing Up Again");
-                    }
+                const response = await fetch('http://192.168.38.120:4000/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fdata)
                 })
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                console.log(data);
+                if (data.msg === 'Verification successful ') {
+                    alert(data.msg);
+                    navigation.navigate('login')
+                }
+                else if (data.msg === 'User already verified') {
+                    alert(data.msg);
+                    navigation.navigate('login')
+                }
+                else if (data.msg === 'Time expired.Please resend a verification code') {
+                    alert(data.msg);
+                }
+                else if (data.msg === 'Invalid credentials') {
+                    alert(data.msg);
+                }
+                else {
+                    alert("Something went wrong !! Try Signing Up Again");
+                }
+            }
+        } catch (error) {
+            console.error('Error posting otp:', error);
         }
-        else if (userCode != actualCode) {
-            setErrormsg('Incorrect code');
-            alert('Incorrect Code')
-            return;
-        }
+
 
     }
     return (
         <View style={styles.container}>
-            {/* {isLoading ? (<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <Text style={{ fontSize: 30, fontWeight: '800', color: 'black' }} >LOADING...</Text></View>) : (
-                <View> */}
-                    <Image style={styles.patternbg} source={pattern} />
-                    <View style={styles.conatiner1}>
-                        <View style={styles.s1}>
-                            <Image style={styles.logo} source={logo} />
-                            <Text style={styles.h1} onPress={() => navigation.navigate('welcome')}>Used2, Inc.</Text>
-                            <Text style={styles.small1}>A place where you practice</Text>
-                        </View>
-                        <View style={styles.s2}>
-                            <Text style={head1}>Verification</Text>
+            <Image style={styles.patternbg} source={pattern} />
+            <View style={styles.conatiner1}>
+                <View style={styles.s1}>
+                    <Image style={styles.logo} source={logo} />
+                    <Text style={styles.h1} onPress={() => navigation.navigate('welcome')}>Used2, Inc.</Text>
+                    <Text style={styles.small1}>A place where you practice</Text>
+                </View>
+                <View style={styles.s2}>
+                    <Text style={head1}>Verification</Text>
 
-                            <Text style={bwmessage}>A code has been sent to you on your Email</Text>
-                            <Text></Text>
+                    <Text style={bwmessage}>A code has been sent to you on your Email</Text>
+                    <Text></Text>
 
-                            {
+                    {
 
-                                errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
-                            }
+                        errormsg ? <Text style={errormessage}>{errormsg}</Text> : null
+                    }
 
-                            <View style={formGroup}>
-                                <Text style={styles.label}>Enter Code</Text>
-                                <Text></Text>
-                                <TextInput style={input}
-                                    placeholder="Enter 6 digit verification code"
-                                    onPressIn={() => setErrormsg(null)}
-                                    secureTextEntry={true}
-                                    onChangeText={(text) => setUserCode(text)} />
-                                <Text style={label2}>Resend Otp</Text>
-                            </View>
-
-                            <TouchableOpacity style={styles.buttonMargin}
-                                onPress={() => Sendtobackend()}
-                            >
-                                <Text style={button1}
-                                >Verify</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.buttonMargin}
-                                onPress={() => navigation.navigate('welcome')}
-                            >
-                                <Text style={button1}
-                                >Back</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <View style={formGroup}>
+                        <Text style={styles.label}>Enter Code</Text>
+                        <Text></Text>
+                        <TextInput style={input}
+                            placeholder="Enter 6 digit verification code"
+                            onPressIn={() => setErrormsg(null)}
+                            secureTextEntry={true}
+                            onChangeText={(text) => setUserCode(text)} />
+                        <Text style={label2}>Resend Otp</Text>
                     </View>
-                {/* </View>
-            )
-            } */}
+
+                    <TouchableOpacity style={styles.buttonMargin}
+                        onPress={() => Sendtobackend()}
+                    >
+                        <Text style={button1}
+                        >Verify</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.buttonMargin}
+                        onPress={() => navigation.navigate('welcome')}
+                    >
+                        <Text style={button1}
+                        >Back</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
         </View>
     )
 }
@@ -125,8 +119,6 @@ const styles = StyleSheet.create({
     patternbg: {
         position: 'absolute',
         top: 0,
-        // width : '100%',
-        // height : '100%',
         zIndex: -1,
     },
     conatiner1: {
@@ -146,7 +138,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#F50057',
         fontWeight: 'bold',
-        textAlign:'center'
+        textAlign: 'center'
     },
     small1: {
         color: '#fff',

@@ -20,7 +20,7 @@ const Login = ({ navigation }) => {
             return;
         }
         else {
-            fetch('http://192.168.38.120:4000/login', {
+            fetch('http://192.168.54.120:4000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
