@@ -11,44 +11,46 @@ const Login = ({ navigation }) => {
         email: '',
         password: ''
     })
-
     const [errormsg, setErrormsg] = useState(null);
-    const Sendtobackend = () => {
-        // console.log(fdata);
-        if (fdata.email == '' || fdata.password == '') {
-            setErrormsg("All fields are required");
-            return;
-        }
-        else {
-            fetch('http://192.168.54.120:4000/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(fdata)
-            })
-                .then(res => res.json()).then(
-                    data => {
-                        console.log(data);
-                        // console.log(data.token)
 
-                        if (data.error) {
-                            setErrormsg(data.error);
-                            console.log(data);
-                            alert("Please enter correct details.")
-                        }
-                        else {
-                            // console.log(data);
-                            const authToken = data.data;
-                            AsyncStorage.setItem('authToken', authToken);
-                            // let tok = AsyncStorage.getItem(authToken);
-                            alert('Login Successfull');
-                            navigation.navigate('category');
-                            // console.log(authToken);
-                            // console.log(data);
-                        }
-                    }
-                )
+
+    async function Sendtobackend() {
+
+        try {
+            if (fdata.email == '' || fdata.password == '') {
+                setErrormsg("All fields are required");
+                return;
+            }
+            else {
+                const response = await fetch('http://192.168.176.120:4000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fdata)
+                });
+
+                const data = await response.json();
+
+                console.log(data);
+
+                if (data.err) {
+                    setErrormsg('Enter Correct details');
+                    console.log(data);
+                    alert("Please enter correct details.");
+                } else {
+                    const authToken = data.data;
+                    await AsyncStorage.setItem('authToken', authToken);
+                    alert('Login Successful');
+                    navigation.navigate('category');
+                }
+            }
+
+
+        }
+        catch (error) {
+            console.error('Error logging in:', error);
+
         }
 
     }

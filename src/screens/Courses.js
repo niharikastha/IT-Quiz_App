@@ -22,7 +22,7 @@ const Courses = ({ navigation, route }) => {
                 return;
             }
           
-      const response = await fetch(`http://192.168.38.120:4000/courses/${CategoryId}`,{
+      const response = await fetch(`http://192.168.176.120:4000/courses/${CategoryId}`,{
         headers:{
           Authorization: `Bearer ${authToken}`,
       }

@@ -23,7 +23,7 @@ const Category = ({ navigation }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch("http://192.168.38.120:4000/category",{
+            const response = await fetch("http://192.168.176.120:4000/category",{
                 headers:{
                     Authorization: `Bearer ${authToken}`,
                 }

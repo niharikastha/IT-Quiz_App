@@ -23,7 +23,7 @@ const Verification = ({ navigation, route }) => {
                     otpCode: userCode
                 }
 
-                const response = await fetch('http://192.168.38.120:4000/verify', {
+                const response = await fetch('http://192.168.176.120:4000/verify', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

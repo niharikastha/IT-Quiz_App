@@ -17,7 +17,7 @@ const Result = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const res = await fetch(`http://192.168.38.120:4000/api/result/${courseId}/${quizId}/${score}`, {
+            const res = await fetch(`http://192.168.176.120:4000/api/result/${courseId}/${quizId}/${score}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

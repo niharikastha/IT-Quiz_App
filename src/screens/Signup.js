@@ -44,7 +44,7 @@ const Signup = ({ navigation }) => {
             return;
         }
         else {
-            fetch('http://192.168.38.120:4000/signup', {
+            fetch('http://192.168.176.120:4000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -16,7 +16,7 @@ const Leaderboard = ({ navigation, route }) => {
                 navigation.navigate('login');
                 return;
             }
-            const response = await fetch(`http://192.168.38.120:4000/api/leader-board/${courseId}`, {
+            const response = await fetch(`http://192.168.176.120:4000/api/leader-board/${courseId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
