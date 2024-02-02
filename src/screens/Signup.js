@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TextInput, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, TextInput, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import pattern from '../../assets/pattern.png';
 import { head1, head2, formGroup, label, input, link, link2, errormessage } from '../common/formcss';
@@ -16,65 +16,7 @@ const Signup = ({ navigation }) => {
     })
 
     const [errormsg, setErrormsg] = useState(null);
-    const Sendtobackend = () => {
-        // console.log(fdata);
-        if (
-            fdata.name == '' ||
-            fdata.email == '' ||
-            fdata.password == '' ||
-            fdata.confirmPassword == '' ||
-            fdata.dob == ''
-        ) {
-            setErrormsg('All fields are required');
-            return;
-        }
-        else if (!validateEmail(fdata.email)) {
-            setErrormsg('Please enter a valid email address');
-            return;
-        } else if (!validateDob(fdata.dob)) {
-            setErrormsg('Please enter a valid date of birth. DOB should be less than 01/01/2019');
-            return;
-        } else if (!validatePassword(fdata.password)) {
-            setErrormsg(
-                'Password must be at least 8 characters long with a number, a special character, and a capital letter'
-            );
-            return;
-        } else if (fdata.password != fdata.confirmPassword) {
-            setErrormsg("Passwords do not match");
-            return;
-        }
-        else {
-            fetch('http://192.168.176.120:4000/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(fdata)
-            })
-                .then((res) => res.json())
-                .then(
-                    (data) => {
-                        console.log(data);
-                        if (data.error === 'Invalid credentials') {
-                            alert('Invalid Credentials')
-                            setErrormsg('Invalid credentials');
-                        }
-                        else if (data.msg === "User registered successfully. Verification code sent") {
-                            // alert('account created successfully');
-                            // console.log(data.udata);
-                            alert(data.msg);
-                            navigation.navigate('verification', { userdata: data.data });
-                        }
-                    }
-                )
-                .catch((error) => {
-                    console.error('Network request failed:', error.message);
-                    // Handle the error here
-                });
-            // console.log(fdata);
-        }
-    }
-
+    const [loading, setLoading] = useState(false);
     const validateEmail = (email) => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
@@ -89,6 +31,70 @@ const Signup = ({ navigation }) => {
         const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return re.test(String(password));
     };
+    async function Sendtobackend() {
+        setLoading(true);
+        try {
+            if (
+                fdata.name == '' ||
+                fdata.email == '' ||
+                fdata.password == '' ||
+                fdata.confirmPassword == '' ||
+                fdata.dob == ''
+            ) {
+                setErrormsg('All fields are required');
+                return;
+            }
+            else if (!validateEmail(fdata.email)) {
+                setErrormsg('Please enter a valid email address');
+                return;
+            } else if (!validateDob(fdata.dob)) {
+                setErrormsg('Please enter a valid date of birth. DOB should be less than 01/01/2019');
+                return;
+            } else if (!validatePassword(fdata.password)) {
+                setErrormsg(
+                    'Password must be at least 8 characters long with a number, a special character, and a capital letter'
+                );
+                return;
+            } else if (fdata.password != fdata.confirmPassword) {
+                setErrormsg("Passwords do not match");
+                return;
+            }
+            else {
+                const response = await fetch('http://192.168.176.120:4000/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fdata)
+                })
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+
+                console.log(data);
+                if (data.error === 'Invalid credentials') {
+                    alert('Invalid Credentials')
+                    setErrormsg('Invalid credentials');
+                }
+                else if (data.msg === "User registered successfully. Verification code sent") {
+                    alert(data.msg);
+                    navigation.navigate('verification', { userdata: data.data });
+                }
+            }
+
+
+        }
+
+        catch (error) {
+            console.log("Server error", error);
+            setErrormsg("An error occurred. Please try again.");
+
+        }
+        finally {
+            setLoading(false);
+        }
+    }
     return (
         <View style={styles.container}>
             <Image style={styles.patternbg} source={pattern} />
@@ -141,11 +147,16 @@ const Signup = ({ navigation }) => {
                         />
                     </View>
 
-                    <TouchableOpacity style={styles.buttonMargin}
-                        onPress={() => {
-                            Sendtobackend();
-                        }}>
-                        <Text style={button1}>Signup</Text>
+                    <TouchableOpacity style={styles.buttonMargin} onPress={() => { Sendtobackend();setErrormsg(null) }}>
+                        <View style={styles.loaderContainer}>
+
+                            {loading ? (
+                                <ActivityIndicator size="large" color="pink" style={styles.loader} />
+                            ) : (
+                                <Text style={button1}>Signup</Text>)
+                            }
+                        </View>
+
                     </TouchableOpacity>
                 </ScrollView>
             </View>
@@ -205,8 +216,9 @@ const styles = StyleSheet.create({
         marginVertical: 5,
 
     },
-    buttonMargin: {
-        marginLeft: 80
-    }
-
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 })
